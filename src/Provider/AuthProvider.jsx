@@ -10,7 +10,7 @@ import {
   signOut,
   updateProfile
 } from 'firebase/auth';
-import { auth } from '../firebase/Firebase.init';
+import { auth } from '../Firebase/Firebase.config';
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
