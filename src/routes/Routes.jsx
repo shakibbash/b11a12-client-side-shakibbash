@@ -4,35 +4,34 @@ import Error from "../pages/Error";
 import RootLayout from "../Layouts/RootLayouts";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import DashboardLayout from "../Layouts/DashBoardLayout";
+import Profile from "../pages/Dashboard/Profile";
+import AddPost from "../pages/Dashboard/AddPost";
+import MyPost from "../pages/Dashboard/MyPost";
+import Membership from "../pages/Dashboard/Membership";
 
 const router = createBrowserRouter([
-    {
+  {
     path: "/",
     element: <RootLayout />,
-   
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path:'/login',
-        element:<Login></Login>
-      },
-      {
-        path:'/register',
-         element:<Register></Register>
-     
-      },
-     
-     
+      { index: true, element: <Home /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
     ],
-    
   },
-    {
-        path: "/*",
-        element: <Error />,
-    },
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />,
+    children: [
+      { path: "profile", element: <Profile /> },       
+      { path: "add-post", element: <AddPost /> },      
+      { path: "my-post", element: <MyPost /> },        
+      { path: "membership", element: <Membership /> }  
+    ],
+  },
+  { path: "/*", element: <Error /> },
 ]);
 
 export default router;
+

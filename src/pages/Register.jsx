@@ -1,185 +1,267 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router'
-import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser, FaCamera } from 'react-icons/fa'
-import Lottie from 'lottie-react'
-import registerAnimation from '../../Public/assets/register.json'
-import { MdForum } from 'react-icons/md'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import {
+  FaGoogle,
+  FaEye,
+  FaEyeSlash,
+  FaEnvelope,
+  FaLock,
+  FaUser,
+} from "react-icons/fa";
+import { MdForum } from "react-icons/md";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import Swal from "sweetalert2";
+import confetti from "canvas-confetti";
+import useAuth from "../Hooks/useAuth";
 
 const Register = () => {
-  const [showPassword, setShowPassword] = useState(false)
+  const { createUser, updateUserProfile, signInWithGoogle } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  // 📌 Handle Email/Password Registration
+  const onSubmit = async (data) => {
+    try {
+      const { name, email, password, photo } = data;
+
+      // 1️⃣ Create Firebase user
+      const userCredential = await createUser(email, password);
+      const user = userCredential.user;
+
+      // 2️⃣ Update Firebase profile
+      await updateUserProfile(user, {
+        displayName: name,
+        photoURL: photo?.[0] ? URL.createObjectURL(photo[0]) : "",
+      });
+
+      // 3️⃣ Prepare user info for MongoDB
+      const userInfo = {
+        uid: user.uid,
+        name: name,
+        email: email,
+        photoURL: photo?.[0] ? URL.createObjectURL(photo[0]) : "",
+        role: "user",
+        badge: "bronze",
+        membership: false,
+        provider: "email",
+        last_login: new Date(),
+        aboutMe: "",
+      };
+
+      await axios.post("http://localhost:3000/users", userInfo);
+
+      // ✅ Confetti + Bronze Badge Alert + Redirect to login
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      Swal.fire({
+        title: "Account Created!",
+        html: `
+          <div class="flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
+            </svg>
+          </div>
+          Bronze badge awarded!`,
+        icon: "success",
+
+      }).then(() => {
+        navigate("/");
+      });
+
+      reset();
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
+    }
+  };
+
+const handleGoogleSignIn = async () => {
+  try {
+    const result = await signInWithGoogle();
+    const user = result.user;
+
+    // Prepare user info for MongoDB
+    const userInfo = {
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      role: "user",
+      badge: "bronze",
+      membership: false,
+      provider: "google",
+      last_login: new Date(),
+      aboutMe: "",
+    };
+
+    // POST to /users → backend handles existing/new user
+    const res = await axios.post("http://localhost:3000/users", userInfo);
+
+    const isNewUser = res.status === 201; // 201 = new user created
+
+    // Show confetti only for new users
+    if (isNewUser) {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    // SweetAlert
+    Swal.fire({
+      title: isNewUser ? "Account Created!" : "Signed in successfully!",
+      html: isNewUser
+        ? `
+        <div class="flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
+          </svg>
+        </div>
+        Bronze badge awarded!`
+        : "Welcome back!",
+      icon: "success",
+      confirmButtonText: "Awesome!",
+    }).then(() => {
+      // Redirect after closing SweetAlert
+      window.location.href = "/";
+    });
+
+  } catch (error) {
+    Swal.fire("Error", error.message, "error");
+  }
+};
+
+
+
+
 
   return (
-    <div className="min-h-screen mt-15  bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen mt-15 bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl w-full flex flex-col lg:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden">
- 
-    {/* Left Side - Visual Content */}
-<div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 p-12 flex-col justify-center items-center text-white relative" data-aos="fade-right" data-aos-duration="1200" data-aos-delay="200">
-  <div className="absolute inset-0 bg-black opacity-10"></div>
-  <div className="relative z-10 text-center">
-    <div className="mb-8" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="600">
-      <MdForum className="w-24 h-24 mx-auto mb-6 text-indigo-100 animate-float" />
-      <h1 className="text-4xl font-bold mb-4">
-        Welcome to <span className="text-indigo-200">Forum</span>X
-      </h1>
-      <p className="text-xl text-indigo-100 leading-relaxed">
-        Connect, share, and discover discussions across topics you love. Join a vibrant community today!
-      </p>
-    </div>
+        {/* Left Section */}
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 p-12 flex-col justify-center items-center text-white relative">
+          <div className="absolute inset-0 bg-black opacity-10"></div>
+          <div className="relative z-10 text-center">
+            <MdForum className="w-24 h-24 mx-auto mb-6 text-indigo-100 animate-float" />
+            <h1 className="text-4xl font-bold mb-4">
+              Welcome to <span className="text-indigo-200">Forum</span>X
+            </h1>
+            <p className="text-xl text-indigo-100">
+              Connect, share, and discover discussions across topics you love.
+            </p>
+          </div>
+        </div>
 
-    <div className="space-y-6 mt-12">
-      <div className="flex items-center space-x-4" data-aos="fade-right" data-aos-duration="800" data-aos-delay="800">
-        <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
-          <FaUser className="w-6 h-6" />
-        </div>
-        <div className="text-left">
-          <h3 className="font-semibold text-lg">Community Discussions</h3>
-          <p className="text-indigo-100">Engage in meaningful conversations with peers</p>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4" data-aos="fade-right" data-aos-duration="800" data-aos-delay="900">
-        <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
-          <FaEnvelope className="w-6 h-6" />
-        </div>
-        <div className="text-left">
-          <h3 className="font-semibold text-lg">Stay Notified</h3>
-          <p className="text-indigo-100">Receive updates for threads and topics you follow</p>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4" data-aos="fade-right" data-aos-duration="800" data-aos-delay="1000">
-        <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
-          <FaLock className="w-6 h-6" />
-        </div>
-        <div className="text-left">
-          <h3 className="font-semibold text-lg">Secure & Private</h3>
-          <p className="text-indigo-100">Your data and discussions are safe with us</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-        {/* Right Side - Registration Form */}
+        {/* Right Section */}
         <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
           <div className="max-w-md mx-auto">
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+              Create your account
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Join ForumX to participate in discussions and connect with the community.
+            </p>
 
-         
-
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Create your account</h2>
-            <p className="text-gray-600 mb-8">Join ForumX to participate in discussions and connect with the community.</p>
-
-            <form className="space-y-6">
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaUser className="h-5 w-5 text-gray-400" />
-                  </div>
+                  <FaUser className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type="text"
-                    id="name"
-                    className="form-input block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    {...register("name", { required: true })}
+                    className="block w-full pl-10 pr-3 py-3 border rounded-lg"
                     placeholder="Enter your full name"
                   />
                 </div>
+                {errors.name && <p className="text-red-500 text-sm">Name is required</p>}
               </div>
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="h-5 w-5 text-gray-400" />
-                  </div>
+                  <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type="email"
-                    id="email"
-                    className="form-input block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    {...register("email", { required: true })}
+                    className="block w-full pl-10 pr-3 py-3 border rounded-lg"
                     placeholder="Enter your email"
                   />
                 </div>
+                {errors.email && <p className="text-red-500 text-sm">Email is required</p>}
               </div>
-              {/* Profile Photo Upload */}
-<div className="mb-4" data-aos="fade-left" data-aos-duration="800" data-aos-delay="1100">
-  <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
-    Profile Photo (Optional)
-  </label>
 
-  <div className="flex items-center justify-center w-full">
-    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-      <div className="flex items-center space-x-2 py-2">
-        <FaCamera className="w-5 h-5 text-gray-400" />
-        <span className="text-sm text-gray-500">Click to upload photo</span>
-      </div>
-      <input
-        id="photo"
-        type="file"
-        className="hidden"
-        accept="image/*"
-        // onChange={handlePhotoChange}  // Optional: add later when implementing logic
-      />
-    </label>
-  </div>
-</div>
+              {/* Profile Photo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Profile Photo (Optional)</label>
+                <input type="file" {...register("photo")} accept="image/*" />
+              </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaLock className="h-5 w-5 text-gray-400" />
-                  </div>
+                  <FaLock className="absolute left-3 top-3 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    className="form-input block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password", { required: true, minLength: 6 })}
+                    className="block w-full pl-10 pr-10 py-3 border rounded-lg"
                     placeholder="Enter your password"
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-400 hover:text-gray-500">
-                      {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-400"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
+                {errors.password && <p className="text-red-500 text-sm">Password must be at least 6 characters</p>}
               </div>
 
-              {/* Sign Up Button */}
+              {/* Create Account */}
               <button
-                type="button"
-                className="w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 font-medium transition-all"
+                type="submit"
+                className="w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Create Account
               </button>
-
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
-                <div className="relative flex justify-center text-sm text-gray-500">Or continue with</div>
-              </div>
-
-              {/* Google Sign-Up */}
-              <button
-                type="button"
-                className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
-              >
-                <FaGoogle className="h-5 w-5 text-red-500 mr-2" /> Continue with Google
-              </button>
-
-              {/* Sign In Link */}
-              <div className="mt-6 text-center text-sm text-gray-600">
-                Already have an account? <Link to="/login" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
-              </div>
             </form>
 
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm text-gray-500">Or continue with</div>
+            </div>
+
+            {/* Google Sign Up */}
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full flex justify-center items-center py-3 px-4 border rounded-lg shadow-sm bg-white hover:bg-gray-50"
+            >
+              <FaGoogle className="h-5 w-5 text-red-500 mr-2" /> Continue with Google
+            </button>
+
+            {/* Sign In Link */}
+            <div className="mt-6 text-center text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link to="/login" className="text-indigo-600 font-medium hover:underline">
+                Sign in
+              </Link>
+            </div>
           </div>
         </div>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

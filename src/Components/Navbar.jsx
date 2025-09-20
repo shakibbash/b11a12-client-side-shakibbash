@@ -4,6 +4,7 @@ import { FaBell, FaHome, FaUserFriends, FaInfoCircle } from "react-icons/fa";
 import { MdForum } from "react-icons/md";
 import useAuth from "../Hooks/useAuth";
 import Swal from "sweetalert2";
+import Logo from "./Logo";
 
 const Navbar = ({ notifications }) => {
   const { user, logOut  } = useAuth();
@@ -46,14 +47,7 @@ const Navbar = ({ notifications }) => {
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 p-2 rounded-lg shadow-lg">
-                <MdForum className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-indigo-400 bg-clip-text text-transparent">
-                ForumX
-              </div>
-            </div>
+           <Logo></Logo>
           </div>
 
           {/* Center Links */}
@@ -61,9 +55,12 @@ const Navbar = ({ notifications }) => {
             <Link to="/" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaHome /> <span>Home</span>
             </Link>
-            <Link to="/membership" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
-              <FaUserFriends /> <span>Membership</span>
-            </Link>
+              {/* Only show Membership if user exists and is NOT a member */}
+  {user && !user.membership && (
+    <Link to="/membership" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
+      <FaUserFriends /> <span>Membership</span>
+    </Link>
+  )}
             <Link to="/about" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaInfoCircle /> <span>About</span>
             </Link>

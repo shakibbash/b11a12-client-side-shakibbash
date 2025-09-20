@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { MdForum } from "react-icons/md";
+import Logo from './Logo';
 
 const Footer = () => {
   return (
@@ -20,14 +21,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and Description */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 p-2 rounded-lg shadow-lg">
-                <MdForum className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-indigo-400 bg-clip-text text-transparent">
-               ForumX
-              </div>
-            </div>
+          <Logo></Logo>
             <p className="text-gray-400 text-sm leading-relaxed">
               Your comprehensive platform for academic success and student life management.
             </p>
