@@ -17,7 +17,7 @@ const Navbar = ({ user, notifications }) => {
               <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 p-2 rounded-lg shadow-lg">
                 <MdForum className="w-6 h-6 text-white" />
               </div>
-              <div className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-indigo-300 bg-clip-text text-transparent">
+              <div className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-indigo-400 bg-clip-text text-transparent">
                 ForumX
               </div>
             </div>
@@ -27,19 +27,19 @@ const Navbar = ({ user, notifications }) => {
           <div className="hidden md:flex space-x-8 items-center justify-center flex-1">
             <Link
               to="/"
-              className="flex items-center space-x-1 hover:text-cyan-300 font-medium transition-colors duration-200"
+              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
             >
               <FaHome /> <span>Home</span>
             </Link>
             <Link
               to="/membership"
-              className="flex items-center space-x-1 hover:text-cyan-300 font-medium transition-colors duration-200"
+              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
             >
               <FaUserFriends /> <span>Membership</span>
             </Link>
             <Link
               to="/about"
-              className="flex items-center space-x-1 hover:text-cyan-300 font-medium transition-colors duration-200"
+              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
             >
               <FaInfoCircle /> <span>About</span>
             </Link>
@@ -49,7 +49,7 @@ const Navbar = ({ user, notifications }) => {
           <div className="hidden md:flex items-center space-x-4">
             {/* Notification */}
             <div className="relative">
-              <FaBell className="text-xl cursor-pointer hover:text-cyan-300 transition-colors duration-200" />
+              <FaBell className="text-xl cursor-pointer hover:text-indigo-400 transition-colors duration-200" />
               {notifications?.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 animate-pulse">
                   {notifications.length}
@@ -63,7 +63,7 @@ const Navbar = ({ user, notifications }) => {
                 <img
                   src={user.photoURL || "/default-avatar.png"}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-300 hover:scale-105 transition-transform duration-200"
+                  className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-400 hover:scale-105 transition-transform duration-200"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 />
                 {dropdownOpen && (
@@ -71,13 +71,13 @@ const Navbar = ({ user, notifications }) => {
                     <p className="px-4 py-2 font-semibold border-b">{user.displayName}</p>
                     <Link
                       to="/dashboard"
-                      className="block px-4 py-2 hover:bg-cyan-50 transition-colors duration-200"
+                      className="block px-4 py-2 hover:bg-indigo-50 transition-colors duration-200"
                     >
                       Dashboard
                     </Link>
                     <button
                       onClick={() => console.log("Logout")}
-                      className="w-full text-left px-4 py-2 hover:bg-cyan-50 transition-colors duration-200"
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors duration-200"
                     >
                       Logout
                     </button>
