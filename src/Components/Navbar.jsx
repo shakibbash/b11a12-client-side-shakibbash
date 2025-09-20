@@ -1,13 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { FaBell, FaHome, FaUserFriends, FaInfoCircle } from "react-icons/fa";
 import { MdForum } from "react-icons/md";
+import useAuth from "../Hooks/useAuth";
+import Swal from "sweetalert2";
 
-const Navbar = ({ user, notifications }) => {
+const Navbar = ({ notifications }) => {
+  const { user, logOut  } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444", // red
+      cancelButtonColor: "#6b7280", // gray
+      confirmButtonText: "Yes, Logout",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logOut ();
+        Swal.fire("Logged Out!", "You have been successfully logged out.", "success");
+      }
+    });
+  };
 
   return (
-    <nav className="bg-white/90 shadow-lg   fixed top-0 left-0 w-full z-50 backdrop-blur-md">
+    <nav className="bg-white/90 shadow-lg fixed top-0 left-0 w-full z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto sm:px-8">
         <div className="flex justify-between h-16 items-center">
           
@@ -25,22 +58,13 @@ const Navbar = ({ user, notifications }) => {
 
           {/* Center Links */}
           <div className="hidden md:flex space-x-8 items-center justify-center flex-1">
-            <Link
-              to="/"
-              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
-            >
+            <Link to="/" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaHome /> <span>Home</span>
             </Link>
-            <Link
-              to="/membership"
-              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
-            >
+            <Link to="/membership" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaUserFriends /> <span>Membership</span>
             </Link>
-            <Link
-              to="/about"
-              className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200"
-            >
+            <Link to="/about" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaInfoCircle /> <span>About</span>
             </Link>
           </div>
@@ -59,28 +83,45 @@ const Navbar = ({ user, notifications }) => {
 
             {/* User Auth */}
             {user ? (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <img
                   src={user.photoURL || "/default-avatar.png"}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-400 hover:scale-105 transition-transform duration-200"
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-300 hover:scale-105 transition-transform duration-200"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 />
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-md py-2 z-50">
-                    <p className="px-4 py-2 font-semibold border-b">{user.displayName}</p>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-4 z-50 overflow-hidden text-center">
+                    
+                    {/* Profile Image */}
+                    <div className="flex justify-center">
+                      <img
+                        src={user.photoURL || "/default-avatar.png"}
+                        alt="Profile"
+                        className="w-20 h-20 rounded-full border-4 border-indigo-100 shadow-md"
+                      />
+                    </div>
+
+                    {/* User Name */}
+                    <p className="mt-3 font-semibold text-gray-800">{user.displayName}</p>
+                    <p className="text-gray-400 text-sm">{user.email}</p>
+
+                    {/* Dashboard Link */}
                     <Link
                       to="/dashboard"
-                      className="block px-4 py-2 hover:bg-indigo-50 transition-colors duration-200"
+                      className="mt-4 block mx-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 font-medium hover:bg-indigo-100 transition-all"
                     >
                       Dashboard
                     </Link>
+
+                    {/* Logout Button */}
                     <button
-                      onClick={() => console.log("Logout")}
-                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors duration-200"
+                      onClick={handleLogout}
+                      className="mt-2 w-[calc(100%-16px)] mx-2 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-all"
                     >
                       Logout
                     </button>
+
                   </div>
                 )}
               </div>
@@ -92,11 +133,6 @@ const Navbar = ({ user, notifications }) => {
                 Join Us
               </Link>
             )}
-          </div>
-
-          {/* Mobile Menu (Optional) */}
-          <div className="md:hidden">
-            {/* Hamburger Menu */}
           </div>
         </div>
       </div>
