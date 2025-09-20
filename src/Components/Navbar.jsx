@@ -7,7 +7,7 @@ const Navbar = ({ user, notifications }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-800 text-white shadow-md">
+    <nav className="bg-white/90 shadow-lg   fixed top-0 left-0 w-full z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto sm:px-8">
         <div className="flex justify-between h-16 items-center">
           
