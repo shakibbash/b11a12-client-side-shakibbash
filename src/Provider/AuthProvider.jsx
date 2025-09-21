@@ -47,6 +47,12 @@ const AuthProvider = ({ children }) => {
     return signInWithPopup(auth, githubProvider);
   };
 
+  // Add reloadUser function
+  const reloadUser = () => {
+    const currentUser = auth.currentUser;
+    setUser(currentUser);
+  };
+
   useEffect(() => {
     const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -66,7 +72,7 @@ const AuthProvider = ({ children }) => {
     logOut,
     signInWithGithub,
     signInWithGoogle,
-
+    reloadUser, // <-- added here
   };
 
   return (

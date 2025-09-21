@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, Link } from "react-router";
+import { Outlet, Link, useNavigate } from "react-router";
 import { Layout, Menu, Avatar, Dropdown, Space, Button, theme } from "antd";
 import {
   UserOutlined,
@@ -7,9 +7,8 @@ import {
   FileTextOutlined,
   CreditCardOutlined,
   LogoutOutlined,
-  CalendarOutlined,
-  SmileOutlined,
 } from "@ant-design/icons";
+import Swal from "sweetalert2"; 
 import Logo from "../Components/Logo";
 import useAuth from "../Hooks/useAuth";
 
@@ -20,18 +19,48 @@ const DashboardLayout = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const { user, logOut } = useAuth(); 
+  const { user, logOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      Swal.fire({
+        title: "Logged Out",
+        text: "You have been logged out successfully!",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      navigate("/"); 
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Logout failed. Try again!",
+        icon: "error",
+      });
+      console.error("Logout failed:", error);
+    }
+  };
 
   const items = [
     { key: "profile", icon: <UserOutlined />, label: <Link to="profile">My Profile</Link> },
     { key: "add-post", icon: <PlusCircleOutlined />, label: <Link to="add-post">Add Post</Link> },
     { key: "my-post", icon: <FileTextOutlined />, label: <Link to="my-post">My Posts</Link> },
     { key: "membership", icon: <CreditCardOutlined />, label: <Link to="membership">Membership</Link> },
-    { key: "logout", icon: <LogoutOutlined />, label: (
-      <Button type="text" onClick={logOut} style={{ padding: 0, color: "white", fontWeight: "bold" }}>
-        Logout
-      </Button>
-    ) },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: (
+        <Button
+          type="text"
+          onClick={handleLogout} 
+          style={{ padding: 0, color: "white", fontWeight: "bold" }}
+        >
+          Logout
+        </Button>
+      ),
+    },
   ];
 
   const userMenu = (
@@ -42,18 +71,11 @@ const DashboardLayout = () => {
     />
   );
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
       <Sider width={240} style={{ background: "#001529" }}>
-        <div className="flex items-center justify-center p-4">
+        <div className="flex items-center  p-4">
           <Logo />
         </div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={["profile"]} items={items} style={{ marginTop: 20 }} />
@@ -72,10 +94,10 @@ const DashboardLayout = () => {
             minHeight: 100,
           }}
         >
-          {/* Left: Dashboard info with icons */}
           <div className="flex justify-center items-center">
-            <h2 style={{ margin: 0, fontWeight: "bold", fontSize: 26 }}>    <span class="text-2xl mr-1">📊</span>Dashboard</h2>
-          
+            <h2 style={{ margin: 0, fontWeight: "bold", fontSize: 26 }}>
+              <span className="text-2xl mr-1">📊</span>Dashboard
+            </h2>
           </div>
 
           {/* Right: User Avatar */}
