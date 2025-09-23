@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 
-@import 'tailwindcss';
+@import "tailwindcss";
 
 
 
@@ -8,12 +8,6 @@
 /* DaisyUI plugin */
 @plugin "daisyui";
 
-/* Apply Urbanist globally */
-html, body, #root {
-  @apply font-urbanist;
-}
-
-/* Ensure DaisyUI uses Urbanist as its sans font */
-:root, [data-theme] {
-  --tw-font-sans: "Urbanist", sans-serif !important;
+.font-urbanist {
+  font-family: "Urbanist", sans-serif !important;
 }

@@ -1,26 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router";
-import { Layout, Menu, Avatar, Dropdown, Space, Button, theme } from "antd";
-import {
-  UserOutlined,
-  PlusCircleOutlined,
-  FileTextOutlined,
-  CreditCardOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
-import Swal from "sweetalert2"; 
+import { FaUser, FaPlusCircle, FaFileAlt, FaCreditCard, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
 import Logo from "../Components/Logo";
 import useAuth from "../Hooks/useAuth";
-
-const { Header, Sider, Content } = Layout;
+import Swal from "sweetalert2";
 
 const DashboardLayout = () => {
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = async () => {
     try {
@@ -32,7 +20,7 @@ const DashboardLayout = () => {
         timer: 2000,
         showConfirmButton: false,
       });
-      navigate("/"); 
+      navigate("/");
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -43,94 +31,97 @@ const DashboardLayout = () => {
     }
   };
 
-  const items = [
-    { key: "profile", icon: <UserOutlined />, label: <Link to="profile">My Profile</Link> },
-    { key: "add-post", icon: <PlusCircleOutlined />, label: <Link to="add-post">Add Post</Link> },
-    { key: "my-post", icon: <FileTextOutlined />, label: <Link to="my-post">My Posts</Link> },
-    { key: "membership", icon: <CreditCardOutlined />, label: <Link to="membership">Membership</Link> },
-    {
-      key: "logout",
-      icon: <LogoutOutlined />,
-      label: (
-        <Button
-          type="text"
-          onClick={handleLogout} 
-          style={{ padding: 0, color: "white", fontWeight: "bold" }}
-        >
-          Logout
-        </Button>
-      ),
-    },
+  const menuItems = [
+    { key: "dashboard", icon: <FaTachometerAlt />, label: "Dashboard", link: "/dashboard" },
+    { key: "profile", icon: <FaUser />, label: "My Profile", link: "profile" },
+    { key: "add-post", icon: <FaPlusCircle />, label: "Add Post", link: "add-post" },
+    { key: "my-post", icon: <FaFileAlt />, label: "My Posts", link: "my-post" },
+    { key: "membership", icon: <FaCreditCard />, label: "Membership", link: "membership" },
+    { key: "logout", icon: <FaSignOutAlt />, label: "Logout", action: handleLogout },
   ];
 
-  const userMenu = (
-    <Menu
-      items={[
-        { key: "email", label: <span>{user?.email}</span>, disabled: true },
-      ]}
-    />
-  );
-
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sider width={240} style={{ background: "#001529" }}>
-        <div className="flex items-center  p-4">
+      <aside
+        className={`bg-[#19183B] border-r-2 border-indigo-700 text-white w-64 flex-shrink-0 transition-all duration-300 ${sidebarOpen ? "block" : "hidden"} md:block`}
+      >
+        <div className="flex items-center justify-center py-6 border-b border-indigo-600">
           <Logo />
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={["profile"]} items={items} style={{ marginTop: 20 }} />
-      </Sider>
+        <nav className="mt-6">
+          {menuItems.map((item) =>
+            item.link ? (
+              <Link
+                key={item.key}
+                to={item.link}
+                className="flex items-center gap-3 py-3 px-6 hover:bg-indigo-600 transition-colors rounded-lg"
+              >
+                {item.icon} <span>{item.label}</span>
+              </Link>
+            ) : (
+              <button
+                key={item.key}
+                onClick={item.action}
+                className="flex items-center gap-3 py-3 px-6 w-full text-left hover:bg-indigo-600 transition-colors rounded-lg"
+              >
+                {item.icon} <span>{item.label}</span>
+              </button>
+            )
+          )}
+        </nav>
+      </aside>
 
-      {/* Main Layout */}
-      <Layout>
-        <Header
-          style={{
-            padding: "0 24px",
-            background: "linear-gradient(90deg, #4f46e5, #3b82f6)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            color: "white",
-            minHeight: 100,
-          }}
-        >
-          <div className="flex justify-center items-center">
-            <h2 style={{ margin: 0, fontWeight: "bold", fontSize: 26 }}>
-              <span className="text-2xl mr-1">📊</span>Dashboard
-            </h2>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col ">
+        {/* Header */}
+        <header className="flex items-center justify-between bg-gradient-to-r from-indigo-500 to-blue-400 text-white px-6 py-6 shadow-md">
+          <div className="flex items-center gap-3">
+            <button
+              className="md:hidden btn btn-ghost text-white"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              ☰
+            </button>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <FaTachometerAlt /> Dashboard
+            </h1>
           </div>
 
-          {/* Right: User Avatar */}
+          {/* User Dropdown */}
           {user && (
-            <Dropdown overlay={userMenu} placement="bottomRight" arrow>
-              <Space style={{ cursor: "pointer" }}>
-                <Avatar
-                  src={user.photoURL || undefined}
-                  icon={!user.photoURL && <UserOutlined />}
-                  size="large"
-                />
-                <span style={{ color: "white", fontWeight: 500 }}>
-                  {user.email}
-                </span>
-              </Space>
-            </Dropdown>
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                <div className="w-10 rounded-full">
+                  <img src={user.photoURL || "https://via.placeholder.com/150"} alt="avatar" />
+                </div>
+              </label>
+              <ul
+                tabIndex={0}
+                className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-white rounded-box w-52 text-black"
+              >
+                <li>
+                  <span className="font-bold">{user.email}</span>
+                </li>
+                <li>
+                  <Link to="profile">My Profile</Link>
+                </li>
+                <li>
+                  <button onClick={handleLogout}>Logout</button>
+                </li>
+              </ul>
+            </div>
           )}
-        </Header>
+        </header>
 
-        <Content style={{ margin: "24px 16px", overflow: "initial" }}>
-          <div
-            style={{
-              padding: 24,
-              minHeight: "80vh",
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
+        {/* Content */}
+        <main className="flex-1 overflow-auto p-6">
+          <div className="bg-white rounded-lg shadow p-6 min-h-[80vh]">
             <Outlet />
           </div>
-        </Content>
-      </Layout>
-    </Layout>
+        </main>
+      </div>
+    </div>
   );
 };
 

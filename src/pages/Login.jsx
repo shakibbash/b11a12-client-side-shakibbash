@@ -8,118 +8,110 @@ import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 import useAuth from '../Hooks/useAuth';
 import axios from 'axios';
-
+import confetti from 'canvas-confetti'; // ✅ import canvas-confetti
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [confetti, setConfetti] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
- // Inside onSubmit for email/password login
-const onSubmit = async (data) => {
-  setLoading(true);
-  try {
-    const userCredential = await signIn(data.email, data.password);
-    const user = userCredential.user;
+  // Email/password login
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const userCredential = await signIn(data.email, data.password);
+      const user = userCredential.user;
 
-    // Store user info in a variable
-    const userInfo = {
-      uid: user.uid,
-      name: user.displayName || "",
-      email: user.email,
-      photoURL: user.photoURL || "",
-      provider: "email",
-    };
+      const userInfo = {
+        uid: user.uid,
+        name: user.displayName || "",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        provider: "email",
+      };
 
-    // Send to backend
-    await axios.post("http://localhost:3000/users", userInfo);
+      await axios.post("http://localhost:3000/users", userInfo);
 
-    // Confetti + Swal
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    Swal.fire({
-      title: "Logged in successfully!",
-      html: `<div class="flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-              </svg>
-             </div>
-             Bronze badge awarded!`,
-      icon: "success",
-      confirmButtonText: "Awesome!",
-    });
-
-    setTimeout(() => navigate("/"), 2000);
-
-  } catch (error) {
-    Swal.fire("Error", error.message, "error");
-  } finally {
-    setLoading(false);
-  }
-};
-
-// Inside handleGoogleSignIn for Google login
-const handleGoogleSignIn = async () => {
-  try {
-    const result = await signInWithGoogle();
-    const user = result.user;
-
-    // Prepare user info for MongoDB
-    const userInfo = {
-      uid: user.uid,
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: "user",
-      badge: "bronze",
-      membership: false,
-      provider: "google",
-      last_login: new Date(),
-      aboutMe: "",
-    };
-
-    // POST to /users → backend handles existing/new user
-    const res = await axios.post("http://localhost:3000/users", userInfo);
-
-    const isNewUser = res.status === 201; // 201 = new user created
-
-    // Show confetti only for new users
-    if (isNewUser) {
+      // ✅ Trigger confetti
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+      Swal.fire({
+        title: "Logged in successfully!",
+        html: `<div class="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
+                </svg>
+               </div>
+               Bronze badge awarded!`,
+        icon: "success",
+        confirmButtonText: "Awesome!",
+      });
+
+      setTimeout(() => navigate("/"), 2000);
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // SweetAlert
-    Swal.fire({
-      title: isNewUser ? "Account Created!" : "Signed in successfully!",
-      html: isNewUser
-        ? `
-        <div class="flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-          </svg>
-        </div>
-        Bronze badge awarded!`
-        : "Welcome back!",
-      icon: "success",
-      confirmButtonText: "Awesome!",
-    }).then(() => {
-      // Redirect after closing SweetAlert
-      window.location.href = "/";
-    });
+  // Google login
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
 
-  } catch (error) {
-    Swal.fire("Error", error.message, "error");
-  }
-};
+      const userInfo = {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        role: "user",
+        badge: "bronze",
+        membership: false,
+        provider: "google",
+        last_login: new Date(),
+        aboutMe: "",
+      };
+
+      const res = await axios.post("http://localhost:3000/users", userInfo);
+      const isNewUser = res.status === 201;
+
+      if (isNewUser) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
+
+      Swal.fire({
+        title: isNewUser ? "Account Created!" : "Signed in successfully!",
+        html: isNewUser
+          ? `<div class="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
+                </svg>
+             </div>
+             Bronze badge awarded!`
+          : "Welcome back!",
+        icon: "success",
+        confirmButtonText: "Awesome!",
+      }).then(() => {
+        window.location.href = "/";
+      });
+
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen mt-15 bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
-      {confetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
       <div className="max-w-6xl w-full flex flex-col lg:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden">
-        
+
         {/* Left Side - Login Form */}
         <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
           <div className="max-w-md mx-auto">

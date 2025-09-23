@@ -13,7 +13,7 @@ const RootLayout = () => {
         
         <div className='flex flex-col min-h-screen  bg-white text-gray-800'>
             <Navbar></Navbar>
-           <main className='flex-grow bg-white'>
+           <main className='flex-grow bg-white my-20'>
         {state === 'loading' ? <Loader /> : <Outlet />}
       </main>
           <footer>
