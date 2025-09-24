@@ -69,8 +69,10 @@ const Membership = () => {
           <Player autoplay loop src={goldBadge} style={{ height: "120px", width: "120px" }} />
           <span className="mt-2 text-yellow-300 text-xl font-bold animate-bounce">Unlock Your Gold Badge!</span>
           <div className="flex gap-6 mb-4 text-white text-2xl mt-4">
+                       <FaCreditCard />
             <FiAward title="Unlimited Posts" />
             <FiLock title="Exclusive Content" />
+         
           </div>
           <h1 className="text-white text-4xl md:text-5xl font-bold mb-4">
             Become a <span className="text-yellow-300">Forum</span> Member
@@ -90,10 +92,12 @@ const Membership = () => {
       <section className="py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 text-gray-900">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-gray-600">
-              Unlock premium features and get recognized with exclusive badges 🚀
-            </p>
+              <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-2">
+        <FaCreditCard /> Choose Your Plan
+      </h1>
+      <p className="text-gray-600">
+        Unlock premium features and get recognized with exclusive badges 🚀
+      </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -179,7 +183,9 @@ const Membership = () => {
 
       {/* Animated Comparison Table */}
       <section className="px-6 max-w-6xl mx-auto my-15">
-        <h2 className="text-3xl font-bold text-center mb-8">Compare Plans</h2>
+        <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+    <FaStar /> Compare Plans
+  </h2>
         <div className="overflow-x-auto">
           <table className="table table-zebra w-full text-center rounded-2xl">
             <thead>
@@ -211,7 +217,10 @@ const Membership = () => {
 
       {/* Feature Highlights */}
       <section className="py-16 bg-blue-50">
-        <h2 className="text-3xl font-bold text-center mb-8">Premium Features</h2>
+         <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+    <FaCrown /> Premium Features
+  </h2>
+
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
           {[
             { icon: <FaCrown />, title: "VIP Badge", desc: "Stand out with a premium badge" },
@@ -263,7 +272,9 @@ const Membership = () => {
 
       {/* FAQ Accordion */}
       <section className="py-16 bg-gray-100">
-        <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+         <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+    <FaInfoCircle /> Frequently Asked Questions
+  </h2>
         <div className="max-w-3xl mx-auto  px-6">
           {[
             { q: "Can I upgrade or downgrade anytime?", a: "Yes, you can change your plan anytime with no hassle." },
