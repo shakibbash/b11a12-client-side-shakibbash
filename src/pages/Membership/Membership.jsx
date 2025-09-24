@@ -62,7 +62,7 @@ const Membership = () => {
         {Array.from({ length: 15 }).map((_, i) => (
           <div key={i} className="absolute text-white opacity-20 animate-pulse"
             style={{ fontSize: `${Math.random() * 20 + 10}px`, top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, animationDuration: `${Math.random() * 5 + 3}s` }}>
-            {["⭐", "✨", "🌟"][Math.floor(Math.random() * 3)]}
+            {["⭐", "✨", "🌟"][Math.floor(Math.random() * 5)]}
           </div>
         ))}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 z-10">
