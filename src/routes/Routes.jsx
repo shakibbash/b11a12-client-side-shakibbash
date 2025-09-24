@@ -8,9 +8,11 @@ import DashboardLayout from "../Layouts/DashBoardLayout";
 import Profile from "../pages/Dashboard/Profile";
 import AddPost from "../pages/Dashboard/AddPost";
 import MyPost from "../pages/Dashboard/MyPost";
-import Membership from "../pages/Dashboard/Membership";
+
 import PostDetails from "../pages/PostDetails";
 import Comments from "../pages/Comments";
+import Membership from "../pages/Membership/Membership";
+
 
 const router = createBrowserRouter([
   {
@@ -21,7 +23,7 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       {path:"/post/:postId" ,element:<PostDetails />},
-       
+          { path: "membership", element: <Membership /> }
     ],
   },
   {
@@ -32,7 +34,7 @@ const router = createBrowserRouter([
       { path: "add-post", element: <AddPost /> },      
       { path: "my-post", element: <MyPost /> },  
       {path:"comments/:postId" ,element:<Comments />},      
-      { path: "membership", element: <Membership /> }  
+     
     ],
   },
   { path: "/*", element: <Error /> },

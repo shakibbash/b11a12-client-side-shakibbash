@@ -116,7 +116,7 @@ const DashboardLayout = () => {
 
         {/* Content */}
         <main className="flex-1 overflow-auto p-6">
-          <div className="bg-white rounded-lg shadow p-6 min-h-[80vh]">
+          <div className=" rounded-lg  p-6 min-h-[80vh]">
             <Outlet />
           </div>
         </main>

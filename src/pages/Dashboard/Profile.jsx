@@ -113,7 +113,7 @@ const Profile = () => {
 
   return (
     <div className="w-full h-screen overflow-y-auto bg-gray-50">
-      <div className="flex flex-col items-center py-6">
+      <div className="flex flex-col items-center ">
         {/* Cover Photo */}
         <div className="relative w-full max-w-6xl">
           <img
@@ -140,7 +140,7 @@ const Profile = () => {
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
-              <label className="absolute bottom-2 right-2 cursor-pointer bg-white p-2 rounded-full shadow hover:bg-gray-100">
+              <label className="absolute bottom-6 right-4 cursor-pointer bg-white p-2 rounded-full shadow hover:bg-gray-100">
                 <FaEdit className="text-gray-700 w-5 h-5" />
                 <input
                   type="file"
