@@ -2,19 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import {
-  UploadOutlined,
-  UserOutlined,
-  MailOutlined,
-  InfoCircleOutlined,
-  FileImageOutlined,
-  TagsOutlined,
-  BulbOutlined,
-  FileAddOutlined,
-} from "@ant-design/icons";
-import { Upload, Button } from "antd";
-import { FaBell, FaCrown, FaPenFancy, FaUsers } from "react-icons/fa";
-import { NavLink } from "react-router";
+import { FaBell, FaCrown, FaPenFancy, FaUsers, FaUpload, FaTimes } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
 import useAuth from "../../Hooks/useAuth";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 
@@ -28,7 +17,20 @@ const AddPost = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [postCount, setPostCount] = useState(0);
-  const [visibility, setVisibility] = useState("public"); // <-- Visibility state
+  const [visibility, setVisibility] = useState("public");
+
+  // Fetch user from backend to get membership
+  const { data: dbUser, isLoading: userLoading } = useQuery({
+    queryKey: ["dbUser", user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      const res = await axios.get(`/users/${user.email}`);
+      return res.data;
+    },
+    enabled: !!user?.email,
+  });
+
+  const isMember = dbUser?.membership === true;
 
   // Fetch predefined tags
   const { data: tags = [], isLoading: tagsLoading } = useQuery({
@@ -47,16 +49,22 @@ const AddPost = () => {
       const res = await axios.get(`/posts?authorEmail=${user.email}`);
       return res.data;
     },
+    enabled: !!user?.email,
   });
 
-  // Initialize local post count
   useEffect(() => {
     if (!postsLoading) setPostCount(userPosts.length);
   }, [userPosts, postsLoading]);
 
-  // Image upload handler
-  const handleUpload = async ({ file }) => {
+  const isLimitReached = !isMember && postCount >= 5;
+
+  // Handle image upload (members only)
+  const handleUpload = async (e) => {
+    if (!isMember) return;
+    const file = e.target.files[0];
+    if (!file) return;
     setUploading(true);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append(
@@ -80,11 +88,12 @@ const AddPost = () => {
     }
   };
 
-  // Form submit handler
+  const handleRemoveImage = () => setImageUrl("");
+
+  // Handle post submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (postCount >= 5) {
+    if (isLimitReached) {
       Swal.fire(
         "Limit Reached",
         "New users can only add up to 5 posts.",
@@ -100,59 +109,51 @@ const AddPost = () => {
 
     try {
       await axios.post("/posts", {
-        authorImage: user?.photoURL || "",
-        authorName: user?.displayName || "Anonymous",
-        authorEmail: user?.email,
+        authorImage: dbUser?.photoURL || "",
+        authorName: dbUser?.name || "Anonymous",
+        authorEmail: dbUser?.email,
         title,
         description,
         tags: selectedTags.map((tag) => tag.value),
         upVote: 0,
         downVote: 0,
         image: imageUrl,
-        visibility, // <-- Add visibility here
+        visibility,
         createdAt: new Date(),
       });
 
       setPostCount((prev) => prev + 1);
-
       Swal.fire("Success", "Post added successfully", "success");
+
+      // Reset form
       setTitle("");
       setDescription("");
       setSelectedTags([]);
       setImageUrl("");
-      setVisibility("public"); // Reset visibility after submit
+      setVisibility("public");
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Failed to add post", "error");
     }
   };
 
-  if (!user) {
-    return (
-      <p className="text-red-500 text-center mt-10">
-        Please log in to add a post.
-      </p>
-    );
-  }
-
-  const isLimitReached = postCount >= 5;
+  if (userLoading) return <p>Loading user info...</p>;
+  if (!user) return <p className="text-red-500 text-center mt-10">Please log in to add a post.</p>;
 
   return (
     <div className="min-h-screen p-4 flex flex-col items-center">
       {/* Heading */}
       <div className="flex flex-col gap-3 mb-4 w-full max-w-6xl">
         <div className="flex items-center gap-3">
-          <FileAddOutlined className="text-blue-500 text-4xl" />
+          <FaPenFancy className="text-blue-500 text-4xl" />
           <div>
             <h1 className="font-urbanist text-3xl text-gray-800">ADD YOUR POST</h1>
             <p className="text-base text-gray-500">
-              Share your story with the world. Submit your article for admin
-              approval.
+              Share your story with the world. Submit your article for admin approval.
             </p>
           </div>
         </div>
 
-        {/* Post Limit Info */}
         <p
           className={`text-sm border-l-4 p-2 rounded mb-2 ${
             !isLimitReached
@@ -169,23 +170,6 @@ const AddPost = () => {
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-6xl flex flex-col lg:flex-row items-start gap-6 overflow-hidden">
         {/* Left Column */}
         <div className="lg:w-2/3 p-6 space-y-5">
-          {/* User Info */}
-          <div className="flex items-center gap-4 mb-4">
-            <img
-              src={user?.photoURL || "https://via.placeholder.com/100"}
-              alt="Author"
-              className="w-16 h-16 rounded-full border-2 border-gray-300"
-            />
-            <div className="space-y-1">
-              <p className="flex items-center gap-2 font-semibold text-gray-800">
-                <UserOutlined /> {user?.displayName || "Anonymous"}
-              </p>
-              <p className="flex items-center gap-2 text-gray-500">
-                <MailOutlined /> {user?.email || "No email"}
-              </p>
-            </div>
-          </div>
-
           {/* Membership Card */}
           {isLimitReached && (
             <div className="bg-blue-50 max-w-2xl mx-auto w-full p-6 rounded-3xl shadow-lg flex flex-row gap-10 text-left">
@@ -216,7 +200,7 @@ const AddPost = () => {
             </div>
           )}
 
-          {/* Post Form (only if under limit) */}
+          {/* Post Form */}
           {!isLimitReached && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
@@ -241,9 +225,11 @@ const AddPost = () => {
                 onChange={setSelectedTags}
                 placeholder={tagsLoading ? "Loading tags..." : "Select tags"}
                 isMulti
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
               />
 
-              {/* Visibility Dropdown */}
               <div className="w-full">
                 <label className="block text-gray-700 mb-1 font-medium">Visibility</label>
                 <select
@@ -255,6 +241,32 @@ const AddPost = () => {
                   <option value="private">Private</option>
                 </select>
               </div>
+
+              {/* Image Upload (members only) */}
+              {isMember ? (
+                <div className="relative">
+                  <label className="block mb-2 font-medium text-gray-700">Upload Image</label>
+                  <input
+                    type="file"
+                    onChange={handleUpload}
+                    className="file-input file-input-bordered file-input-primary w-full"
+                    disabled={uploading}
+                  />
+                  {imageUrl && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xl"
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">
+                  Upgrade to membership to upload images.
+                </p>
+              )}
 
               <button
                 type="submit"
@@ -269,29 +281,23 @@ const AddPost = () => {
         {/* Right Column */}
         <div className="lg:w-1/3 p-4 flex flex-col items-center justify-start gap-4">
           {!isLimitReached ? (
-            // Post Tips
             <div className="bg-gradient-to-b from-blue-50 to-indigo-50 p-4 flex flex-col items-center justify-start gap-3 rounded-2xl shadow w-full">
               <h3 className="text-xl font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <BulbOutlined className="text-blue-500 text-2xl" /> Post Tips
+                <FaPenFancy className="text-blue-500 text-2xl" /> Post Tips
               </h3>
 
               <div className="space-y-2 w-full text-gray-700 text-sm">
                 <p className="flex items-start gap-2">
-                  <FileImageOutlined className="mt-1 text-blue-500" /> Upload a
-                  clear and high-quality image for better visibility. (Optional)
+                  <FaUpload className="mt-1 text-blue-500" /> Upload a clear and high-quality image for better visibility. (Optional)
                 </p>
                 <p className="flex items-start gap-2">
-                  <TagsOutlined className="mt-1 text-green-500" /> Select relevant
-                  tags so your post reaches the right audience.
+                  <FaPenFancy className="mt-1 text-green-500" /> Select relevant tags so your post reaches the right audience.
                 </p>
                 <p className="flex items-start gap-2">
-                  <InfoCircleOutlined className="mt-1 text-purple-500" /> Write a
-                  concise description summarizing your post content.
+                  <FaCrown className="mt-1 text-purple-500" /> Write a concise description summarizing your post content.
                 </p>
               </div>
 
-              {/* Image Preview */}
-              <h3 className="text-lg font-semibold text-gray-700 mt-2">Image Preview</h3>
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -303,23 +309,8 @@ const AddPost = () => {
                   No Image
                 </div>
               )}
-
-              <Upload
-                customRequest={handleUpload}
-                listType="picture"
-                maxCount={1}
-                showUploadList={false}
-              >
-                <Button type="primary" icon={<UploadOutlined />} loading={uploading}>
-                  {imageUrl ? "Change Image" : "Upload Image"}
-                </Button>
-              </Upload>
-              <p className="text-gray-500 text-center text-xs mt-1">
-                Supported formats: JPG, PNG.
-              </p>
             </div>
           ) : (
-            // Membership Lock
             <div className="bg-amber-400 w-full p-6 mr-20 flex flex-col items-center justify-center rounded-2xl shadow-md gap-2 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -331,8 +322,7 @@ const AddPost = () => {
               </svg>
               <h3 className="text-lg font-bold text-white">Unlock Gold Membership</h3>
               <p className="text-white text-sm">
-                You have reached the free post limit (5/5). Become a member to post
-                unlimited articles and earn a Gold Badge!
+                You have reached the free post limit (5/5). Become a member to post unlimited articles and earn a Gold Badge!
               </p>
               <NavLink to="/dashboard-membership">
                 <button className="mt-2 py-2 px-4 bg-yellow-600 text-white font-medium rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-yellow-700 transition duration-300">

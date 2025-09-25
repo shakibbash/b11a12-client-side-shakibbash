@@ -1,6 +1,5 @@
 import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Table } from "antd";
 import { useNavigate } from "react-router";
 import { FaThumbsUp, FaThumbsDown, FaComment, FaTrash } from "react-icons/fa";
 import useAuth from "../../Hooks/useAuth";
@@ -13,16 +12,15 @@ const MyPosts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch user's posts only if user exists
-const { data: posts = [], isLoading } = useQuery({
-  queryKey: ["myPosts", user?.email],
-  enabled: !!user?.email,
-  queryFn: async () => {
-    const res = await axios.get(`/user-posts/${user.email}`);
-    return res.data; // posts now include commentCount
-  },
-});
-
+  // Fetch user's posts
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["myPosts", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axios.get(`/user-posts/${user.email}`);
+      return res.data; // posts now include commentCount
+    },
+  });
 
   // Delete post handler
   const handleDelete = async (id) => {
@@ -47,57 +45,6 @@ const { data: posts = [], isLoading } = useQuery({
     }
   };
 
-  // Table columns
-  const columns = [
-    {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
-      render: (text) => (
-        <p className="truncate max-w-xs" title={text}>
-          {text}
-        </p>
-      ),
-    },
-    {
-      title: "Votes",
-      key: "votes",
-      render: (_, record) => (
-        <div className="flex gap-4 items-center">
-          <FaThumbsUp className="text-green-600" /> {record.upVote || 0}
-          <FaThumbsDown className="text-red-600" /> {record.downVote || 0}
-        </div>
-      ),
-    },
-    {
-      title: "Comments",
-      key: "comments",
-      render: (_,record) => (
-        <div className="flex gap-2 items-center">
-          <FaComment className="text-blue-500" /> {record.commentCount || 0}
-        </div>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <div className="flex gap-2">
-          <Button
-            type="primary"
-            icon={<FaComment />}
-            onClick={() => navigate(`/dashboard/comments/${record._id}`)}
-          >
-            Comment
-          </Button>
-          <Button danger icon={<FaTrash />} onClick={() => handleDelete(record._id)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
   if (!user) {
     return (
       <p className="text-red-500 text-center mt-10">
@@ -108,19 +55,70 @@ const { data: posts = [], isLoading } = useQuery({
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">My Posts</h1>
+ 
 
-      {posts.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <p className="text-gray-500 text-center mt-4">Loading...</p>
+      ) : posts.length === 0 ? (
         <p className="text-gray-500 mt-4">
           You have not posted anything yet. Start sharing your thoughts!
         </p>
       ) : (
-        <Table
-          columns={columns}
-          dataSource={posts.map((post) => ({ ...post, key: post._id }))}
-          loading={isLoading}
-          pagination={{ pageSize: 10 }}
-        />
+        <div className="overflow-x-auto bg-white p-5 rounded-xl">
+               <h1 className="text-2xl font-bold mb-4 text-center">My Posts</h1>
+          <table className="table table-zebra w-full">
+            {/* Table Head */}
+            <thead className="bg-blue-400 text-white">
+              <tr>
+                <th>Title</th>
+                <th>Votes</th>
+                <th>Comments</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            {/* Table Body */}
+            <tbody>
+              {posts.map((post) => (
+                <tr key={post._id}>
+                  <td>
+                    <p className="truncate max-w-xs" title={post.title}>
+                      {post.title}
+                    </p>
+                  </td>
+                  <td>
+                    <div className="flex gap-2 items-center">
+                      <FaThumbsUp className="text-green-600" /> {post.upVote || 0}
+                      <FaThumbsDown className="text-red-600" /> {post.downVote || 0}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex gap-2 items-center">
+                      <FaComment className="text-blue-500" /> {post.commentCount || 0}
+                    </div>
+                  </td>
+                  <td className="flex gap-2">
+                    <button
+                      className="btn btn-primary btn-sm flex items-center gap-1"
+                      onClick={() => navigate(`/dashboard/comments/${post._id}`)}
+                    >
+                      <FaComment /> Comment
+                    </button>
+                    <button
+                      className="btn btn-error btn-sm flex items-center gap-1"
+                      onClick={() => handleDelete(post._id)}
+                    >
+                      <FaTrash /> Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Pagination */}
+          <div className="flex justify-end mt-4">
+            {/* You can add custom pagination here if needed */}
+          </div>
+        </div>
       )}
     </div>
   );

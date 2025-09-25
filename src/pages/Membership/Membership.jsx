@@ -57,7 +57,7 @@ const Membership = () => {
   return (
     <div className="mt-5">
       {/* Hero Banner */}
-      <div className="relative w-full h-[500px] rounded-xl shadow-2xl overflow-hidden">
+      <div className="relative w-full h-[500px] rounded-xl shadow-2xl overflow-hidden p-90">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 z-0"></div>
         {Array.from({ length: 15 }).map((_, i) => (
           <div key={i} className="absolute text-white opacity-20 animate-pulse"
@@ -66,8 +66,8 @@ const Membership = () => {
           </div>
         ))}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 z-10">
-          <Player autoplay loop src={goldBadge} style={{ height: "120px", width: "120px" }} />
-          <span className="mt-2 text-yellow-300 text-xl font-bold animate-bounce">Unlock Your Gold Badge!</span>
+          <Player autoplay loop src={goldBadge} style={{ height: "220px", width: "220px" }} />
+          <span className="mt-2 text-yellow-300 text-3xl font-bold animate-bounce">Unlock Your Gold Badge!</span>
           <div className="flex gap-6 mb-4 text-white text-2xl mt-4">
                        <FaCreditCard />
             <FiAward title="Unlimited Posts" />

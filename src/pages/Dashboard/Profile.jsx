@@ -17,7 +17,8 @@ import {
 import Swal from 'sweetalert2';
 import useAuth from '../../Hooks/useAuth';
 import useAxiosSecure from '../../Hooks/useAxiosSecure';
-
+import bronzeBadge from "../../../Public/assets/New Medal.json";
+import Lottie from 'lottie-react';
 const Profile = () => {
   const { user } = useAuth();
   const axios = useAxiosSecure();
@@ -50,17 +51,16 @@ const Profile = () => {
       if (!user?.email) return [];
       const res = await axios.get(`/user-posts/${user.email}`);
       return res.data || [];
-      return res.data.slice(0, 3);
     },
   });
 
-
-
   if (isLoading) return <p className="text-center py-4">Loading posts...</p>;
   if (isError) return <p className="text-center py-4 text-red-500">Failed to load posts.</p>;
-  if (posts.length === 0) return <p className="text-center py-4">No posts yet.</p>;
 
-
+  // Sort and get only 3 most recent posts
+  const recentPosts = posts
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 3);
 
   // Compute stats dynamically
   const totalPosts = posts.length;
@@ -112,8 +112,8 @@ const Profile = () => {
   if (!profileData) return <p className="text-center py-6 text-lg">Loading profile...</p>;
 
   return (
-    <div className="w-full h-screen overflow-y-auto bg-gray-50">
-      <div className="flex flex-col items-center ">
+    <div className="w-full h-screen bg-gray-50">
+      <div className="flex flex-col items-center">
         {/* Cover Photo */}
         <div className="relative w-full max-w-6xl">
           <img
@@ -155,18 +155,30 @@ const Profile = () => {
         </div>
 
         {/* Personal Info */}
-        <div className="mt-28 flex flex-col items-center gap-4 bg-white w-full max-w-6xl p-8 rounded-xl shadow-lg text-center">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
-            <div className="flex items-center gap-4">
-              <h1 className="text-4xl font-bold">{profileData.name}</h1>
-              {profileData.badge && (
-                <span className="flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-medium">
-                  <FaCrown /> {profileData.badge.charAt(0).toUpperCase() + profileData.badge.slice(1)}
-                </span>
-              )}
-            </div>
-            <p className="text-gray-600 md:text-lg">🟢{profileData.email}</p>
-          </div>
+    {/* Personal Info */}
+<div className="mt-28 flex flex-col items-center gap-4 bg-white w-full max-w-6xl p-8 rounded-xl shadow-lg text-center relative">
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full relative">
+    <div className="flex items-center relative ">
+      <h1 className="text-4xl font-bold">{profileData.name}</h1>
+
+      {/* Badge */}
+      {profileData.badge === 'bronze' && (
+        <div className="w-40 h-40 absolute md:-right-26 -right-16   ">
+          <Lottie
+            animationData={bronzeBadge}
+            loop
+            autoplay
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )}
+    </div>
+
+    <p className="text-gray-600 md:text-lg mt-2 md:mt-0">
+      <span className="animate-pulse">🟢</span> {profileData.email}
+    </p>
+  </div>
+
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 w-full">
@@ -175,7 +187,7 @@ const Profile = () => {
                 <FaClipboardList className="text-blue-600 text-xl" />
               </div>
               <h1 className="text-lg font-semibold">Total Posts</h1>
-              <p className='text-lg'>{totalPosts}</p>
+              <p className="text-lg">{totalPosts}</p>
             </div>
 
             <div className="bg-green-50 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
@@ -183,7 +195,7 @@ const Profile = () => {
                 <FaArrowUp className="text-green-600 text-xl" />
               </div>
               <h1 className="text-lg font-semibold">Total Upvotes</h1>
-              <p className='text-lg'>{totalUpvotes}</p>
+              <p className="text-lg">{totalUpvotes}</p>
             </div>
 
             <div className="bg-red-50 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
@@ -191,7 +203,7 @@ const Profile = () => {
                 <FaArrowDown className="text-red-600 text-xl" />
               </div>
               <h1 className="text-lg font-semibold">Total Downvotes</h1>
-              <p className='text-lg'>{totalDownvotes}</p>
+              <p className="text-lg">{totalDownvotes}</p>
             </div>
           </div>
 
@@ -222,80 +234,78 @@ const Profile = () => {
                 </button>
               </div>
             ) : (
-              <div className='p-3 bg-gray-50'>
+              <div className="p-3 bg-gray-50">
                 <p className="text-gray-700 text-lg">{bio || 'No bio provided yet.'}</p>
               </div>
             )}
           </div>
-{/* Recent Posts */}
-{/* Recent Posts */}
-<h1 className="mt-8 text-3xl font-bold text-gray-800">My Recent Posts</h1>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-  {posts.map((post) => (
-    <div
-      key={post._id}
-      className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between"
-    >
-      {/* Author Info */}
-      <div className="flex items-center gap-3 mb-4">
-        <img
-          src={profileData.photoURL || 'https://via.placeholder.com/40?text=User'}
-          alt={profileData.name}
-          className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400 hover:scale-110 transition"
-        />
-        <span className="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer">
-          {profileData.name}
-        </span>
-      </div>
 
-      {/* Post Title */}
-      <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 hover:underline cursor-pointer mb-3">
-        {post.title || 'Untitled'}
-      </h3>
+          {/* Recent Posts */}
+          <h1 className="mt-8 text-3xl font-bold text-gray-800">My Recent Posts</h1>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            {recentPosts.map((post) => (
+              <div
+                key={post._id}
+                className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between"
+              >
+                {/* Author Info */}
+                <div className="flex items-center gap-3 mb-4">
+                  <img
+                    src={profileData.photoURL || 'https://via.placeholder.com/40?text=User'}
+                    alt={profileData.name}
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400 hover:scale-110 transition"
+                  />
+                  <span className="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer">
+                    {profileData.name}
+                  </span>
+                </div>
 
-      {/* Post Content */}
-      <p className="text-gray-600 text-sm mb-4">
-        {(post.content || '').slice(0, 120)}
-        {(post.content || '').length > 120 ? '...' : ''}
-      </p>
+                {/* Post Title */}
+                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 hover:underline cursor-pointer mb-3">
+                  {post.title || 'Untitled'}
+                </h3>
 
-      {/* Tags */}
-      {post.tag && (
-        <span className="inline-block bg-gradient-to-r from-purple-200 to-pink-200 text-purple-800 px-3 py-1 rounded-full text-xs font-medium mb-4">
-          {post.tag}
-        </span>
-      )}
+                {/* Post Content */}
+                <p className="text-gray-600 text-sm mb-4">
+                  {(post.content || '').slice(0, 120)}
+                  {(post.content || '').length > 120 ? '...' : ''}
+                </p>
 
-      {/* Post Stats */}
-      <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 hover:text-green-500 transition">
-            <FaArrowUp /> {post.upVote || 0}
+                {/* Tags */}
+                {post.tag && (
+                  <span className="inline-block bg-gradient-to-r from-purple-200 to-pink-200 text-purple-800 px-3 py-1 rounded-full text-xs font-medium mb-4">
+                    {post.tag}
+                  </span>
+                )}
+
+                {/* Post Stats */}
+                <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 hover:text-green-500 transition">
+                      <FaArrowUp /> {post.upVote || 0}
+                    </div>
+                    <div className="flex items-center gap-1 hover:text-red-500 transition">
+                      <FaArrowDown /> {post.downVote || 0}
+                    </div>
+                    <div className="flex items-center gap-1 hover:text-blue-500 transition">
+                      <FaComment /> {post.commentCount || 0}
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* View Post Button */}
+                <Link
+                  to={`/post/${post._id}`}
+                  className="mt-auto text-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold"
+                >
+                  View Post
+                </Link>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-1 hover:text-red-500 transition">
-            <FaArrowDown /> {post.downVote || 0}
-          </div>
-          <div className="flex items-center gap-1 hover:text-blue-500 transition">
-            <FaComment /> {post.commentCount || 0}
-          </div>
-        </div>
-        <span className="text-xs text-gray-400">
-          {new Date(post.createdAt).toLocaleDateString()}
-        </span>
-      </div>
-
-      {/* View Post Button */}
-      <Link
-        to={`/post/${post._id}`}
-        className="mt-auto text-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold"
-      >
-        View Post
-      </Link>
-    </div>
-  ))}
-</div>
-
-
         </div>
       </div>
     </div>
