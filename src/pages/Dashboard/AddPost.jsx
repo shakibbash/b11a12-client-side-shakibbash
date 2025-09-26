@@ -2,7 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { FaBell, FaCrown, FaPenFancy, FaUsers, FaUpload, FaTimes, FaImage } from "react-icons/fa";
+import {
+  FaBell,
+  FaCrown,
+  FaPenFancy,
+  FaUsers,
+  FaUpload,
+  FaTimes,
+  FaImage,
+} from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import useAuth from "../../Hooks/useAuth";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
@@ -54,14 +62,18 @@ const AddPost = () => {
   });
 
   useEffect(() => {
-    if (!postsLoading) setPostCount(userPosts.length);
-  }, [userPosts, postsLoading]);
+    if (!postsLoading) {
+      const userSpecificPosts = userPosts.filter(
+        (post) => post.authorEmail === user.email
+      );
+      setPostCount(userSpecificPosts.length);
+    }
+  }, [userPosts, postsLoading, user?.email]);
 
   const isLimitReached = !isMember && postCount >= 5;
 
   // Handle image upload (members only)
   const handleUpload = async (e) => {
-
     if (!isMember) return;
     const file = e.target.files[0];
     if (!file) return;
@@ -91,11 +103,9 @@ const AddPost = () => {
   };
 
   const handleRemoveImage = () => {
-    setImageUrl("")
-      // reset the file input
-  const fileInput = document.querySelector('input[type="file"]');
-  if (fileInput) fileInput.value = "";
-
+    setImageUrl("");
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = "";
   };
 
   // Handle post submission
@@ -133,7 +143,6 @@ const AddPost = () => {
       setPostCount((prev) => prev + 1);
       Swal.fire("Success", "Post added successfully", "success");
 
-      // Reset form
       setTitle("");
       setDescription("");
       setSelectedTags([]);
@@ -145,14 +154,19 @@ const AddPost = () => {
     }
   };
 
-  if (userLoading) return <Loader></Loader>;
-  if (!user) return <p className="text-red-500 text-center mt-10">Please log in to add a post.</p>;
+  if (userLoading) return <Loader />;
+  if (!user)
+    return (
+      <p className="text-red-500 text-center mt-10">
+        Please log in to add a post.
+      </p>
+    );
 
   return (
     <div className="min-h-screen p-4 flex flex-col items-center">
       {/* Heading */}
       <div className="flex flex-col gap-3 mb-4 w-full max-w-6xl">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <FaPenFancy className="text-blue-500 text-4xl" />
           <div>
             <h1 className="font-urbanist text-3xl text-gray-800">ADD YOUR POST</h1>
@@ -161,53 +175,54 @@ const AddPost = () => {
             </p>
           </div>
         </div>
-<p
-  className={`text-sm border-l-4 p-2 rounded mb-2 ${
-    !isMember && !isLimitReached
-      ? "text-yellow-700 bg-yellow-100 border-yellow-400"
-      : !isMember && isLimitReached
-      ? "text-red-700 bg-red-100 border-red-400"
-      : "text-green-700 bg-green-100 border-green-400"
-  }`}
->
-  {!isMember && !isLimitReached
-    ? `⚠️ New users can add up to 5 posts. You have added ${postCount} posts so far.`
-    : !isMember && isLimitReached
-    ? `❌ You have reached your post limit. See the right panel to unlock membership.`
-    : `✨ You are a member. Post as much as you like!`}
-</p>
 
-
+        {/* Post Limit / Membership Info */}
+        <p
+          className={`text-sm border-l-4 p-2 rounded mb-2 ${
+            !isMember && !isLimitReached
+              ? "text-yellow-700 bg-yellow-100 border-yellow-400"
+              : !isMember && isLimitReached
+              ? "text-red-700 bg-red-100 border-red-400"
+              : "text-green-700 bg-green-100 border-green-400"
+          }`}
+        >
+          {!isMember && !isLimitReached
+            ? `⚠️ New users can add up to 5 posts. You have added ${postCount} posts so far.`
+            : !isMember && isLimitReached
+            ? `❌ You have reached your post limit. See the right panel to unlock membership.`
+            : `✨ You are a member. Post as much as you like!`}
+        </p>
       </div>
 
+      {/* Main Layout */}
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-6xl flex flex-col lg:flex-row items-start gap-6 overflow-hidden">
         {/* Left Column */}
-        <div className="lg:w-2/3 p-6 space-y-5">
+        <div className="lg:w-2/3 w-full p-4 md:p-6 flex flex-col gap-5">
           {/* Membership Card */}
           {isLimitReached && (
-            <div className="bg-blue-50 max-w-2xl mx-auto w-full p-6 rounded-3xl shadow-lg flex flex-row gap-10 text-left">
-              <div className="flex flex-col items-start gap-4 w-1/3">
-                <div className="flex items-center gap-3 text-black">
-                  <FaCrown className="text-yellow-500 text-3xl" />
-                  <h2 className="text-2xl font-bold">Upgrade to Membership</h2>
+            <div className="bg-blue-50 w-full md:max-w-2xl mx-auto p-4 md:p-6 rounded-3xl shadow-lg flex flex-col md:flex-row gap-4 md:gap-10 text-left">
+              <div className="flex flex-col items-start gap-3 md:w-1/3 w-full">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <FaCrown className="text-yellow-500 text-2xl md:text-3xl" />
+                  <h2 className="text-lg md:text-xl font-bold">Upgrade to Membership</h2>
                 </div>
-                <p className="text-sm">
+                <p className="text-sm md:text-base">
                   Unlock exclusive benefits and take your forum experience to the next level!
                 </p>
               </div>
 
-              <ul className="flex flex-col gap-3 text-black text-sm w-2/3">
+              <ul className="flex flex-col gap-2 md:gap-3 text-sm md:text-base md:w-2/3 w-full">
                 <li className="flex items-center gap-2">
-                  <FaPenFancy className="text-black" /> Post unlimited articles and stories
+                  <FaPenFancy /> Post unlimited articles and stories
                 </li>
                 <li className="flex items-center gap-2">
-                  <FaCrown className="text-black" /> Highlight your posts with a Gold Badge
+                  <FaCrown /> Highlight your posts with a Gold Badge
                 </li>
                 <li className="flex items-center gap-2">
-                  <FaUsers className="text-black" /> Gain access to exclusive member-only discussions
+                  <FaUsers /> Gain access to exclusive member-only discussions
                 </li>
                 <li className="flex items-center gap-2">
-                  <FaBell className="text-black" /> Ad-free browsing & notifications for trending posts
+                  <FaBell /> Ad-free browsing & notifications for trending posts
                 </li>
               </ul>
             </div>
@@ -215,7 +230,7 @@ const AddPost = () => {
 
           {/* Post Form */}
           {!isLimitReached && (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 w-full">
               <input
                 type="text"
                 placeholder="Post Title"
@@ -240,7 +255,7 @@ const AddPost = () => {
                 isMulti
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
-                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
 
               <div className="w-full">
@@ -255,7 +270,7 @@ const AddPost = () => {
                 </select>
               </div>
 
-              {/* Image Upload (members only) */}
+              {/* Image Upload */}
               {isMember ? (
                 <div className="relative">
                   <label className="block mb-2 font-medium text-gray-700">Upload Image</label>
@@ -292,14 +307,14 @@ const AddPost = () => {
         </div>
 
         {/* Right Column */}
-        <div className="lg:w-1/3 p-4 flex flex-col items-center justify-start gap-4">
+        <div className="lg:w-1/3 w-full p-4 flex flex-col items-center justify-start gap-4">
           {!isLimitReached ? (
             <div className="bg-gradient-to-b from-blue-50 to-indigo-50 p-4 flex flex-col items-center justify-start gap-3 rounded-2xl shadow w-full">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <FaPenFancy className="text-blue-500 text-2xl" /> Post Tips
+              <h3 className="text-lg md:text-xl font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <FaPenFancy className="text-blue-500 text-xl md:text-2xl" /> Post Tips
               </h3>
 
-              <div className="space-y-2 w-full text-gray-700 text-sm">
+              <div className="space-y-2 w-full text-gray-700 text-sm md:text-base">
                 <p className="flex items-start gap-2">
                   <FaUpload className="mt-1 text-blue-500" /> Upload a clear and high-quality image for better visibility. (Optional)
                 </p>
@@ -311,32 +326,28 @@ const AddPost = () => {
                 </p>
               </div>
 
-             {imageUrl ? (
-  <img
-    src={imageUrl}
-    alt="Preview"
-    className="w-full h-36 object-cover rounded-lg shadow"
-  />
-) : uploading ? (
-  // Loader UI
-  <div className="w-full h-36 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-blue-400">
-    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-  </div>
-) : (
-  <div className="w-full h-36 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-blue-400 cursor-pointer">
-    <FaImage className="w-12 h-12 mb-2 text-blue-400" />
-    <div className="text-center">
-      <p className="text-sm text-gray-700 mb-2">
-        <span className="font-semibold">Click to upload</span>
-      </p>
-      <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
-    </div>
-  </div>
-)}
-
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-full h-36 object-cover rounded-lg shadow"
+                />
+              ) : uploading ? (
+                <div className="w-full h-36 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-blue-400">
+                  <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <div className="w-full h-36 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-blue-400 cursor-pointer">
+                  <FaImage className="w-12 h-12 mb-2 text-blue-400" />
+                  <div className="text-center">
+                    <p className="text-sm text-gray-700 mb-2 font-semibold">Click to upload</p>
+                    <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="bg-amber-400 w-full p-6 mr-20 flex flex-col items-center justify-center rounded-2xl shadow-md gap-2 text-center">
+            <div className="bg-amber-400 w-full p-6 flex flex-col items-center justify-center rounded-2xl shadow-md gap-2 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-16 h-16 p-4 rounded-full text-yellow-600 bg-amber-50"
@@ -345,12 +356,12 @@ const AddPost = () => {
               >
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
               </svg>
-              <h3 className="text-lg font-bold text-white">Unlock Gold Membership</h3>
-              <p className="text-white text-sm">
+              <h3 className="text-lg md:text-xl font-bold text-white">Unlock Gold Membership</h3>
+              <p className="text-sm md:text-base text-white text-center">
                 You have reached the free post limit (5/5). Become a member to post unlimited articles and earn a Gold Badge!
               </p>
-              <NavLink to="/dashboard-membership">
-                <button className="mt-2 py-2 px-4 bg-yellow-600 text-white font-medium rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-yellow-700 transition duration-300">
+              <NavLink to="/membership" className="w-full md:w-auto">
+                <button className="mt-2 w-full md:w-auto py-2 px-4 bg-yellow-600 text-white font-medium rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-yellow-700 transition duration-300">
                   <FaCrown className="text-sm" /> Buy Membership
                 </button>
               </NavLink>

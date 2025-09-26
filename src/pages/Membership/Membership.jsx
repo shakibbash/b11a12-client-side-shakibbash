@@ -10,6 +10,7 @@ import Marquee from "react-fast-marquee";
 import { useNavigate } from "react-router";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
+import Loader from "../../Components/Loader";
 // Plans
 const plans = [
   {
@@ -70,7 +71,7 @@ const Membership = () => {
     fetchUser();
   }, [user?.email, axiosSecure]);
 
-  if (loading) return <div className="text-center mt-20">Loading user...</div>;
+  if (loading) return <Loader></Loader>;
   if (!userData) return <div className="text-center mt-20">User not found</div>;  
 
   const handleProceedToPayment = () => {
