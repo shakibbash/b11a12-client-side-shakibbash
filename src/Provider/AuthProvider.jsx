@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  updateProfile
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../Firebase/Firebase.config';
 
@@ -47,39 +47,27 @@ const AuthProvider = ({ children }) => {
     return signInWithPopup(auth, githubProvider);
   };
 
-  // Add reloadUser function
-  const reloadUser = () => {
-    const currentUser = auth.currentUser;
-    setUser(currentUser);
-  };
-
   useEffect(() => {
-    const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      console.log('User in the onAuthStateChange : ', currentUser);
-      setLoading(false);
+      setLoading(false); 
     });
 
-    return () => unSubscribe();
+    return () => unsubscribe();
   }, []);
 
   const authInfo = {
     user,
     loading,
     createUser,
-    updateUserProfile,
     signIn,
+    updateUserProfile,
     logOut,
-    signInWithGithub,
     signInWithGoogle,
-    reloadUser, // <-- added here
+    signInWithGithub,
   };
 
-  return (
-    <AuthContext.Provider value={authInfo}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;

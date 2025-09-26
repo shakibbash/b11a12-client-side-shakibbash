@@ -54,7 +54,7 @@ const Profile = () => {
     },
   });
 
-  if (isLoading) return <p className="text-center py-4">Loading posts...</p>;
+  // if (isLoading) return <p className="text-center py-4">Loading posts...</p>;
   if (isError) return <p className="text-center py-4 text-red-500">Failed to load posts.</p>;
 
   // Sort and get only 3 most recent posts

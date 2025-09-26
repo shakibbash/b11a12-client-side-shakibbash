@@ -6,6 +6,7 @@ import { FaBell, FaCrown, FaPenFancy, FaUsers, FaUpload, FaTimes } from "react-i
 import { NavLink } from "react-router-dom";
 import useAuth from "../../Hooks/useAuth";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
+import Loader from "../../Components/Loader";
 
 const AddPost = () => {
   const { user } = useAuth();
@@ -137,7 +138,7 @@ const AddPost = () => {
     }
   };
 
-  if (userLoading) return <p>Loading user info...</p>;
+  if (userLoading) return <Loader></Loader>;
   if (!user) return <p className="text-red-500 text-center mt-10">Please log in to add a post.</p>;
 
   return (
