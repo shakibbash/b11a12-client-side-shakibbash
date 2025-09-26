@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Select from "react-select";
 import Swal from "sweetalert2";
-import { FaBell, FaCrown, FaPenFancy, FaUsers, FaUpload, FaTimes } from "react-icons/fa";
+import { FaBell, FaCrown, FaPenFancy, FaUsers, FaUpload, FaTimes, FaImage } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import useAuth from "../../Hooks/useAuth";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
@@ -61,6 +61,7 @@ const AddPost = () => {
 
   // Handle image upload (members only)
   const handleUpload = async (e) => {
+
     if (!isMember) return;
     const file = e.target.files[0];
     if (!file) return;
@@ -89,7 +90,13 @@ const AddPost = () => {
     }
   };
 
-  const handleRemoveImage = () => setImageUrl("");
+  const handleRemoveImage = () => {
+    setImageUrl("")
+      // reset the file input
+  const fileInput = document.querySelector('input[type="file"]');
+  if (fileInput) fileInput.value = "";
+
+  };
 
   // Handle post submission
   const handleSubmit = async (e) => {
@@ -154,18 +161,23 @@ const AddPost = () => {
             </p>
           </div>
         </div>
+<p
+  className={`text-sm border-l-4 p-2 rounded mb-2 ${
+    !isMember && !isLimitReached
+      ? "text-yellow-700 bg-yellow-100 border-yellow-400"
+      : !isMember && isLimitReached
+      ? "text-red-700 bg-red-100 border-red-400"
+      : "text-green-700 bg-green-100 border-green-400"
+  }`}
+>
+  {!isMember && !isLimitReached
+    ? `⚠️ New users can add up to 5 posts. You have added ${postCount} posts so far.`
+    : !isMember && isLimitReached
+    ? `❌ You have reached your post limit. See the right panel to unlock membership.`
+    : `✨ You are a member. Post as much as you like!`}
+</p>
 
-        <p
-          className={`text-sm border-l-4 p-2 rounded mb-2 ${
-            !isLimitReached
-              ? "text-yellow-700 bg-yellow-100 border-yellow-400"
-              : "text-red-700 bg-red-100 border-red-400"
-          }`}
-        >
-          {!isLimitReached
-            ? `⚠️ New users can add up to 5 posts. You have added ${postCount} posts so far.`
-            : `❌ You have reached your post limit. See the right panel to unlock membership.`}
-        </p>
+
       </div>
 
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-6xl flex flex-col lg:flex-row items-start gap-6 overflow-hidden">
@@ -299,17 +311,29 @@ const AddPost = () => {
                 </p>
               </div>
 
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-36 object-cover rounded-lg shadow"
-                />
-              ) : (
-                <div className="w-full h-36 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
-                  No Image
-                </div>
-              )}
+             {imageUrl ? (
+  <img
+    src={imageUrl}
+    alt="Preview"
+    className="w-full h-36 object-cover rounded-lg shadow"
+  />
+) : uploading ? (
+  // Loader UI
+  <div className="w-full h-36 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-dashed border-blue-400">
+    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+) : (
+  <div className="w-full h-36 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-blue-400 cursor-pointer">
+    <FaImage className="w-12 h-12 mb-2 text-blue-400" />
+    <div className="text-center">
+      <p className="text-sm text-gray-700 mb-2">
+        <span className="font-semibold">Click to upload</span>
+      </p>
+      <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+    </div>
+  </div>
+)}
+
             </div>
           ) : (
             <div className="bg-amber-400 w-full p-6 mr-20 flex flex-col items-center justify-center rounded-2xl shadow-md gap-2 text-center">

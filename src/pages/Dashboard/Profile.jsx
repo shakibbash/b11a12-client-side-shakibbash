@@ -18,6 +18,7 @@ import Swal from 'sweetalert2';
 import useAuth from '../../Hooks/useAuth';
 import useAxiosSecure from '../../Hooks/useAxiosSecure';
 import bronzeBadge from "../../../Public/assets/New Medal.json";
+import goldBadge from "../../../Public/assets/gold medal.json";
 import Lottie from 'lottie-react';
 const Profile = () => {
   const { user } = useAuth();
@@ -162,8 +163,8 @@ const Profile = () => {
       <h1 className="text-4xl font-bold">{profileData.name}</h1>
 
       {/* Badge */}
-      {profileData.badge === 'bronze' && (
-        <div className="w-40 h-40 absolute md:-right-26 -right-16   ">
+      {profileData.badge === 'bronze' ? (
+        <div className="w-40 h-40 absolute md:-right-26    ">
           <Lottie
             animationData={bronzeBadge}
             loop
@@ -171,7 +172,18 @@ const Profile = () => {
             style={{ width: '100%', height: '100%' }}
           />
         </div>
+      ) :  (
+        <div className="w-25 h-25 absolute md:-right-26 -right-6   ">
+          <Lottie
+            animationData={goldBadge}
+            loop
+            autoplay
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+        
       )}
+<span className='ml-5 bg-amber-400 px-3 py-1 text-sm rounded-4xl'>badge</span>
     </div>
 
     <p className="text-gray-600 md:text-lg mt-2 md:mt-0">
