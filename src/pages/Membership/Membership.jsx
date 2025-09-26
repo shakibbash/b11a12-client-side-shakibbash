@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiAward, FiLock } from "react-icons/fi";
 import { Player } from "@lottiefiles/react-lottie-player";
 import goldBadge from "../../../Public/assets/gold medal.json"; 
@@ -7,6 +7,9 @@ import Lottie from "lottie-react";
 import bronzeBadge from "../../../Public/assets/New Medal.json";
 import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation";
 import Marquee from "react-fast-marquee";
+import { useNavigate } from "react-router";
+import useAxiosSecure from "../../Hooks/useAxiosSecure";
+import useAuth from "../../Hooks/useAuth";
 // Plans
 const plans = [
   {
@@ -48,11 +51,34 @@ const borderClasses = {
 };
 
 const Membership = () => {
+   const { user, loading } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const [userData, setUserData] = useState(null);  // Fetch user data
+
   const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
+    useEffect(() => {
+    if (!user?.email) return;
+    const fetchUser = async () => {
+      try {
+        const res = await axiosSecure.get(`/users/${user.email}`);
+        setUserData(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUser();
+  }, [user?.email, axiosSecure]);
+
+  if (loading) return <div className="text-center mt-20">Loading user...</div>;
+  if (!userData) return <div className="text-center mt-20">User not found</div>;  
+
   const handleProceedToPayment = () => {
     if (!selected) return alert("Please select a plan first.");
     // Replace with your Stripe payment route
-    window.location.href = `/payment/${selected}`;
+   
+  // pass selected plan to payments route
+  navigate("/payments");
   };
   return (
     <div className="mt-5">
@@ -101,73 +127,69 @@ const Membership = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {plans.map((plan, idx) => (
-              <div
-                key={idx}
-                onClick={() => setSelected(plan.name)}
-                className={`relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border-3 cursor-pointer transform transition hover:scale-105
-                  ${selected === plan.name ? borderClasses[plan.name] : "border-transparent"}
-                  ${plan.name === "Gold" ? "scale-105 shadow-2xl" : ""}
-                `}
-              >
-                {/* Status Dots */}
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-3 h-3 bg-amber-600 rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+             {plans.map((plan, idx) => {
+              const isCurrentPlan = userData.membership && plan.name === "Gold"; 
+              return (
+                <div
+                  key={idx}
+                  onClick={() => !isCurrentPlan && setSelected(plan.name)}
+                  className={`relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border-3 cursor-pointer transform transition hover:scale-105
+                    ${selected === plan.name ? borderClasses[plan.name] : "border-transparent"}
+                    ${plan.popular ? "scale-105 shadow-2xl" : ""}
+                    ${isCurrentPlan ? " cursor-not-allowed" : ""}
+                  `}
+                >
+                  {/* Badge */}
+                  <div className="mb-4 flex justify-center">
+                    <Lottie animationData={plan.badge} loop autoplay style={{ width: 300, height: 200 }} />
+                  </div>
+
+                  {/* Title & Price */}
+                  <h2 className="text-2xl font-bold text-center">{plan.name}</h2>
+                  <p className="text-indigo-600 text-3xl font-bold mt-2 text-center">{plan.price}</p>
+
+                  {/* Features */}
+                  <ul className="mt-6 space-y-3">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-gray-700">
+                        <FaCheckCircle className="text-green-500" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Buttons */}
+                  <div className="mt-8 flex flex-col gap-3">
+                    <button
+                      disabled={isCurrentPlan}
+                      className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold transition shadow-md ${
+                        isCurrentPlan
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : plan.name === "Gold"
+                          ? "bg-yellow-400 hover:bg-yellow-500 text-black"
+                          : plan.name === "Silver"
+                          ? "bg-gray-400 hover:bg-gray-500 text-white"
+                          : "bg-amber-600 hover:bg-amber-700 text-white"
+                      }`}
+                    >
+                      {plan.icon} {isCurrentPlan ? "Already a Member" : plan.cta} <FaArrowRight />
+                    </button>
+                  </div>
+
+                  {/* Popular Tag */}
+                  {plan.popular && (
+                    <span className="absolute top-4 left-4 text-xs bg-indigo-600 text-white px-2 py-1 rounded-full">
+                      Most Popular
+                    </span>
+                  )}
                 </div>
-
-                {/* Badge */}
-                <div className="mb-4 flex justify-center">
-                  <Lottie animationData={plan.badge} loop autoplay style={{ width: 300, height: 200 }} />
-                </div>
-
-                {/* Title & Price */}
-                <h2 className="text-2xl font-bold text-center">{plan.name}</h2>
-                <p className="text-indigo-600 text-3xl font-bold mt-2 text-center">
-                  {plan.price}
-                </p>
-
-                {/* Features */}
-                <ul className="mt-6 space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-gray-700">
-                      <FaCheckCircle className="text-green-500" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Buttons */}
-                <div className="mt-8 flex flex-col gap-3">
-                  <button
-                    className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold transition shadow-md ${
-                      plan.name === "Gold"
-                        ? "bg-yellow-400 hover:bg-yellow-500 text-black"
-                        : plan.name === "Silver"
-                        ? "bg-gray-400 hover:bg-gray-500 text-white"
-                        : "bg-amber-600 hover:bg-amber-700 text-white"
-                    }`}
-                  >
-                    {plan.icon} {plan.cta} <FaArrowRight />
-                  </button>
-
-                </div>
-
-                {/* Popular Tag */}
-                {plan.popular && (
-                  <span className="absolute top-4 left-4 text-xs bg-indigo-600 text-white px-2 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                )}
-
-                
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
-      {selected && (
+        {/* Selected Plan */}
+      {selected && !userData.membership && (
         <section className="py-12 bg-white/90 text-gray-900 text-center">
           <h2 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
             <FaCreditCard /> You Selected: {selected}

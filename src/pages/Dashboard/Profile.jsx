@@ -182,7 +182,7 @@ const Profile = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 w-full">
-            <div className="bg-blue-50 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
+            <div className="bg-blue-50 border-l-[8px] border-blue-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
               <div className="bg-blue-100 p-3 rounded-full mb-2">
                 <FaClipboardList className="text-blue-600 text-xl" />
               </div>
@@ -190,7 +190,7 @@ const Profile = () => {
               <p className="text-lg">{totalPosts}</p>
             </div>
 
-            <div className="bg-green-50 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
+            <div className="bg-green-50  border-l-[8px] border-green-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
               <div className="bg-green-100 p-3 rounded-full mb-2">
                 <FaArrowUp className="text-green-600 text-xl" />
               </div>
@@ -198,7 +198,7 @@ const Profile = () => {
               <p className="text-lg">{totalUpvotes}</p>
             </div>
 
-            <div className="bg-red-50 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
+            <div className="bg-red-50 border-l-[8px] border-red-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
               <div className="bg-red-100 p-3 rounded-full mb-2">
                 <FaArrowDown className="text-red-600 text-xl" />
               </div>

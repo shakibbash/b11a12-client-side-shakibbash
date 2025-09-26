@@ -12,6 +12,8 @@ import MyPost from "../pages/Dashboard/MyPost";
 import PostDetails from "../pages/PostDetails";
 import Comments from "../pages/Comments";
 import Membership from "../pages/Membership/Membership";
+import MembershipPaymentForm from "../pages/Payment/MembershipPaymentForm";
+import Payment from "../pages/Payment/Payment";
 
 
 const router = createBrowserRouter([
@@ -23,7 +25,8 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       {path:"/post/:postId" ,element:<PostDetails />},
-          { path: "membership", element: <Membership /> }
+          { path: "membership", element: <Membership /> },
+          {path:'payments', element:<Payment></Payment>}
     ],
   },
   {
