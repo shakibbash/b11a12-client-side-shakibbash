@@ -10,13 +10,19 @@ import {
   FaHome,
   FaBars,
   FaTimes,
+  FaBullhorn,
+  FaUsers,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import Logo from "../Components/Logo";
 import useAuth from "../Hooks/useAuth";
+
 import Swal from "sweetalert2";
+import useUserRole from "../Hooks/useUserRole";
 
 const DashboardLayout = () => {
   const { user, logOut } = useAuth();
+  const { isAdmin, isUser } = useUserRole(); 
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -41,15 +47,32 @@ const DashboardLayout = () => {
     }
   };
 
-  const menuItems = [
+  //  User Sidebar Links
+  const userMenuItems = [
     { key: "dashboard", icon: <FaTachometerAlt />, label: "Dashboard", link: "/dashboard" },
     { key: "profile", icon: <FaUser />, label: "My Profile", link: "profile" },
     { key: "add-post", icon: <FaPlusCircle />, label: "Add Post", link: "add-post" },
     { key: "my-post", icon: <FaFileAlt />, label: "My Posts", link: "my-post" },
     { key: "membership", icon: <FaCreditCard />, label: "Membership", link: "/membership" },
+  ];
+
+  //  Admin Sidebar Links
+  const adminMenuItems = [
+    { key: "dashboard", icon: <FaTachometerAlt />, label: "Admin Dashboard", link: "/dashboard" },
+    { key: "profile", icon: <FaUser />, label: "Admin Profile", link: "profile" },
+    { key: "manage-users", icon: <FaUsers />, label: "Manage Users", link: "manage-users" },
+    { key: "reports", icon: <FaExclamationTriangle />, label: "Reported Activities", link: "reports" },
+    { key: "announcement", icon: <FaBullhorn />, label: "Make Announcement", link: "announcement" },
+  ];
+
+  //  Common Links
+  const commonItems = [
     { key: "back-to-home", icon: <FaHome />, label: "Back to Home", link: "/" },
     { key: "logout", icon: <FaSignOutAlt />, label: "Logout", action: handleLogout },
   ];
+
+  //  Final menu depending on role
+  const menuItems = isAdmin ? [...adminMenuItems, ...commonItems] : [...userMenuItems, ...commonItems];
 
   return (
     <div className="flex h-screen bg-gray-100">
