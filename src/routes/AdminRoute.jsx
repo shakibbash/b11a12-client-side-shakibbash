@@ -6,7 +6,7 @@ const AdminRoute = ({ children }) => {
   const location = useLocation();
 
   if (isLoading) {
-    return <p>Checking role...</p>; // show loader until role loads
+    return <p>Checking role...</p>;
   }
 
   if (userRole !== "admin") {
