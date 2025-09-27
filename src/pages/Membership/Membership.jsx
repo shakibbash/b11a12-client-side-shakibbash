@@ -54,9 +54,8 @@ const borderClasses = {
 const Membership = () => {
    const { user, loading } = useAuth();
   const axiosSecure = useAxiosSecure();
-  const [userData, setUserData] = useState(null);  // Fetch user data
-
-  const [selected, setSelected] = useState(null);
+  const [userData, setUserData] = useState(null);  
+const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
   const navigate = useNavigate();
     useEffect(() => {
     if (!user?.email) return;
@@ -71,8 +70,8 @@ const Membership = () => {
     fetchUser();
   }, [user?.email, axiosSecure]);
 
-  if (loading) return <Loader></Loader>;
-  if (!userData) return <div className="text-center mt-20">User not found</div>;  
+  if (loading || !userData) return <Loader />;;
+ 
 
   const handleProceedToPayment = () => {
     if (!selected) return alert("Please select a plan first.");
@@ -221,8 +220,8 @@ const Membership = () => {
               {[
                 ["Unlimited posts & comments", false, true, true],
                 ["Ad-free browsing", false, true, true],
-                ["VIP badge", false, false, true],
-                ["Access to exclusive events", false, false, true],
+                ["VIP badge", false, true, true],
+                ["Access to exclusive events", false, true, false],
               ].map((row, idx) => (
                 <tr key={idx}>
                   <td>{row[0]}</td>
@@ -244,13 +243,13 @@ const Membership = () => {
     <FaCrown /> Premium Features
   </h2>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 ">
           {[
             { icon: <FaCrown />, title: "VIP Badge", desc: "Stand out with a premium badge" },
             { icon: <FaStar />, title: "Ad-Free", desc: "Enjoy a smooth browsing experience" },
             { icon: <FaMedal />, title: "Exclusive Events", desc: "Access webinars & polls" },
           ].map((f, i) => (
-            <div key={i} className="card bg-white shadow-lg p-6 text-center hover:scale-105 transition">
+            <div key={i} className="card  bg-white border-b-[6px] border-amber-300 shadow-lg p-6 text-center hover:scale-105 transition">
               <div className="text-4xl mb-4 text-yellow-400 mx-auto bg-blue-50 rounded-full p-2">{f.icon}</div>
               <h3 className="font-bold text-xl mb-2">{f.title}</h3>
               <p className="text-gray-700">{f.desc}</p>
