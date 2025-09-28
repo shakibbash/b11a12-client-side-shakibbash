@@ -7,21 +7,21 @@ const useUserRole = () => {
   const axios = useAxiosSecure();
   const { user, loading } = useAuth();
 
-  const { data: userRole, isLoading, error, refetch } = useQuery({
-    queryKey: ['userRole', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return 'user'; // default fallback
-      try {
-        const response = await axios.get(`users/${user.email}`);
-        return response.data?.role || 'user';
-      } catch {
-        return 'user'; 
-      }
-    },
-    enabled: !!user?.email && !loading,
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-  });
+ const { data: userRole, isLoading, error, refetch } = useQuery({
+  queryKey: ['userRole', user?.email],
+  queryFn: async () => {
+    if (!user?.email) return 'user'; // default fallback
+    try {
+      const response = await axios.get(`users/${encodeURIComponent(user.email)}`);
+      return response.data?.role || 'user';
+    } catch {
+      return 'user'; 
+    }
+  },
+  enabled: !!user?.email && !loading,
+  staleTime: 5 * 60 * 1000,
+  cacheTime: 10 * 60 * 1000,
+});
 
   return {
     userRole,

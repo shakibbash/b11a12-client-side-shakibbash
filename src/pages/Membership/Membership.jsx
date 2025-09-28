@@ -70,7 +70,7 @@ const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
     fetchUser();
   }, [user?.email, axiosSecure]);
 
-  if (loading || !userData) return <Loader />;;
+  if (loading || !userData) return <Loader />;
  
 
   const handleProceedToPayment = () => {

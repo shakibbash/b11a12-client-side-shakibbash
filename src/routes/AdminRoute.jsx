@@ -1,12 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
 import useUserRole from "../Hooks/useUserRole";
+import Loader from "../Components/Loader";
 
 const AdminRoute = ({ children }) => {
   const { userRole, isLoading } = useUserRole();
   const location = useLocation();
 
   if (isLoading) {
-    return <p>Checking role...</p>;
+    return <Loader></Loader>;
   }
 
   if (userRole !== "admin") {

@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 import useAuth from '../Hooks/useAuth';
 import axios from 'axios';
-import confetti from 'canvas-confetti'; // ✅ import canvas-confetti
+import confetti from 'canvas-confetti'; 
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
@@ -19,27 +19,37 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   // Email/password login
-  const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const userCredential = await signIn(data.email, data.password);
-      const user = userCredential.user;
+// Email/password login
+const onSubmit = async (data) => {
+  setLoading(true);
+  try {
+    const userCredential = await signIn(data.email, data.password);
+    const user = userCredential.user;
 
-      const userInfo = {
-        uid: user.uid,
-        name: user.displayName || "",
-        email: user.email,
-        photoURL: user.photoURL || "",
-        provider: "email",
-      };
+    const userInfo = {
+      uid: user.uid,
+      name: user.displayName || "",
+      email: user.email,
+      photoURL: user.photoURL || "",
+      provider: "email",
+      role: "user",
+      badge: "bronze",
+      membership: false,
+      last_login: new Date(),
+      aboutMe: "",
+    };
 
-      await axios.post("http://localhost:3000/users", userInfo);
+    // 1️⃣ Check if user already exists
+    const existingUser = await axios.get(`/users?email=${user.email}`);
 
-      // ✅ Trigger confetti
+    if (existingUser.data.length === 0) {
+      // First-time registration
+      await axios.post("/users", userInfo);
+
+      // Show confetti + Bronze badge
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-
       Swal.fire({
-        title: "Logged in successfully!",
+        title: "Account Created!",
         html: `<div class="flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
@@ -48,15 +58,19 @@ const Login = () => {
                Bronze badge awarded!`,
         icon: "success",
         confirmButtonText: "Awesome!",
-      });
-
-      setTimeout(() => navigate("/"), 2000);
-    } catch (error) {
-      Swal.fire("Error", error.message, "error");
-    } finally {
-      setLoading(false);
+      }).then(() => navigate("/"));
+    } else {
+      // Existing user → normal login
+      Swal.fire("Welcome back!", "Logged in successfully", "success").then(() => navigate("/"));
     }
-  };
+
+  } catch (error) {
+    Swal.fire("Error", error.message, "error");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Google login
   const handleGoogleSignIn = async () => {
@@ -78,7 +92,7 @@ const Login = () => {
         aboutMe: "",
       };
 
-      const res = await axios.post("http://localhost:3000/users", userInfo);
+      const res = await axios.post("/users", userInfo);
       const isNewUser = res.status === 201;
 
       if (isNewUser) {

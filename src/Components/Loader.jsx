@@ -1,4 +1,5 @@
 import React from 'react';
+import { MdForum } from 'react-icons/md';
 
 const Loader = () => {
   return (
@@ -7,7 +8,7 @@ const Loader = () => {
         {/* Animated Logo */}
         <div className="mb-8">
           <div className="w-20 h-20 mx-auto mb-4 bg-cyan-400 rounded-full flex items-center justify-center animate-pulse">
-            <span className="text-3xl font-bold text-indigo-900">F</span>
+             <MdForum className="w-[100px] h-[100px] text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">ForumX</h2>
           <p className="text-cyan-400 text-sm">Loading your forum...</p>

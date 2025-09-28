@@ -20,8 +20,9 @@ import useAuth from "../Hooks/useAuth";
 import Swal from "sweetalert2";
 import useUserRole from "../Hooks/useUserRole";
 
+
 const DashboardLayout = () => {
-  const { user, logOut } = useAuth();
+  const { user, logOut, } = useAuth();
   const { isAdmin, isUser } = useUserRole(); 
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,7 +60,7 @@ const DashboardLayout = () => {
   //  Admin Sidebar Links
   const adminMenuItems = [
     { key: "dashboard", icon: <FaTachometerAlt />, label: "Admin Dashboard", link: "/dashboard" },
-    { key: "profile", icon: <FaUser />, label: "Admin Profile", link: "profile" },
+    { key: "profile", icon: <FaUser />, label: "Admin Profile", link: "admin-profile" },
     { key: "manage-users", icon: <FaUsers />, label: "Manage Users", link: "manage-users" },
     { key: "reports", icon: <FaExclamationTriangle />, label: "Reported Activities", link: "reports" },
     { key: "announcement", icon: <FaBullhorn />, label: "Make Announcement", link: "announcement" },

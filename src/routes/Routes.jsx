@@ -17,9 +17,10 @@ import Payment from "../pages/Payment/Payment";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
 import AdminProfile from "../pages/AdminPages/AdminProfile";
-import ManageUsers from "../pages/AdminPages/ManageUsers";
-import ReportedActivities from "../pages/AdminPages/ReportedActivities";
+
 import Announcement from "../pages/AdminPages/Announcement";
+import ReportedActivities from "../pages/AdminPages/ReportedActivities ";
+import ManageUsers from "../pages/AdminPages/ManageUsers";
 
 // Admin pages
 
@@ -63,15 +64,15 @@ const router = createBrowserRouter([
         path: "manage-users",
         element: (
           <AdminRoute>
-            <ManageUsers />
+          <ManageUsers></ManageUsers>
           </AdminRoute>
         ),
       },
       {
-        path: "reported-activities",
+        path: "reports",
         element: (
           <AdminRoute>
-            <ReportedActivities />
+                 <ReportedActivities></ReportedActivities>
           </AdminRoute>
         ),
       },
