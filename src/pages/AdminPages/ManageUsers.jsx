@@ -47,7 +47,7 @@ const ManageUsers = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-100  min-h-screen">
       {/* Header with Icon */}
       <div className="mb-6 flex items-center gap-3">
         <FaUsers className="text-3xl text-blue-500" />
@@ -75,7 +75,7 @@ const ManageUsers = () => {
       </div>
 
       {/* Users Table */}
-      <div className="overflow-x-auto rounded-lg shadow-md bg-white">
+      <div className="overflow-x-auto rounded-lg shadow-2xl bg-white">
         <table className="min-w-full text-left">
         <thead className="bg-gray-100 text-gray-600 uppercase text-sm">
   <tr>

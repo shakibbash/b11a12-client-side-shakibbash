@@ -15,7 +15,9 @@ import Logo from './Logo';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 border-t border-gray-700/50">
+    <div>
+      <svg class="bg-gray-900 relative block w-full h-12 text-gray-900" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-gray-50"></path></svg>
+  <footer className="bg-gray-900 border-t border-gray-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -23,7 +25,7 @@ const Footer = () => {
           <div className="space-y-4">
           <Logo></Logo>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Your comprehensive platform for academic success and student life management.
+              Your comprehensive platform for exploring posts, sharing your thoughts & discovering trending topics!.
             </p>
           </div>
 
@@ -134,6 +136,8 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </div>
+    
   );
 };
 

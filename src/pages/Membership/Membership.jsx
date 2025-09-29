@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { FiAward, FiLock } from "react-icons/fi";
 import { Player } from "@lottiefiles/react-lottie-player";
-import goldBadge from "../../../Public/assets/gold medal.json"; 
+ 
 import { FaCheckCircle, FaCrown, FaMedal, FaStar, FaArrowRight, FaInfoCircle, FaCreditCard } from "react-icons/fa";
 import Lottie from "lottie-react";
+import goldBadge from "../../../Public/assets/gold medal.json";
 import bronzeBadge from "../../../Public/assets/New Medal.json";
 import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation";
 import Marquee from "react-fast-marquee";
@@ -83,7 +84,7 @@ const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
   return (
     <div className="mt-5">
       {/* Hero Banner */}
-      <div className="relative w-full h-[500px] rounded-xl shadow-2xl overflow-hidden p-90">
+      <div className="relative w-full h-[600px] md:h-[500px] rounded-xl shadow-2xl overflow-hidden pt-60 md:p-90">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 z-0"></div>
         {Array.from({ length: 15 }).map((_, i) => (
           <div key={i} className="absolute text-white opacity-20 animate-pulse"
