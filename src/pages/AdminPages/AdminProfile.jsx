@@ -27,6 +27,7 @@ import {
   FaBullhorn,
   FaTimes,
 } from "react-icons/fa";
+import AnnouncementsLists from "./AnnouncementLists";
 
 const COLORS = ["#4ade80", "#60a5fa", "#facc15"]; // green, blue, yellow
 const DARK_BG = "#1f2937";
@@ -320,20 +321,11 @@ const handleAddTag = async () => {
 
       {/* Recent Announcements */}
       <div className="bg-white shadow rounded-xl p-6">
-        <h3 className="font-bold mb-4 flex items-center gap-2">
+        <h3 className="font-bold mb-4 flex justify-center items-center gap-2">
           <FaBullhorn /> Recent Announcements
         </h3>
-        {recentAnnouncements.length === 0 ? (
-          <p>No announcements yet.</p>
-        ) : (
-          <ul className="list-disc list-inside">
-            {recentAnnouncements.map((a) => (
-              <li key={a._id} className="mb-1">
-                <span className="font-bold">{a.title}</span> - {a.description.substring(0, 50)}...
-              </li>
-            ))}
-          </ul>
-        )}
+        <AnnouncementsLists></AnnouncementsLists>
+       
       </div>
     </div>
   );
