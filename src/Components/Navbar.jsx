@@ -79,6 +79,9 @@ const Navbar = () => {
             <Link to="/about" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
               <FaInfoCircle /> <span>About</span>
             </Link>
+            <Link to="/notifications" className="flex items-center space-x-1 hover:text-indigo-400 font-medium transition-colors duration-200">
+  <FaBell /> <span>Notifications</span>
+</Link>
           </div>
 
           {/* Right Side */}
@@ -167,7 +170,9 @@ const Navbar = () => {
             <Link to="/about" className="flex items-center space-x-2 hover:text-indigo-400 font-medium">
               <FaInfoCircle /> <span>About</span>
             </Link>
-
+            <Link to="/notifications" className="flex items-center space-x-2 hover:text-indigo-400 font-medium">
+  <FaBell /> <span>Notifications</span>
+</Link>
             <div className="flex items-center gap-2 mt-2 cursor-pointer" onClick={goToNotifications}>
               <FaBell className="text-xl" />
               {announcements.length > 0 && (

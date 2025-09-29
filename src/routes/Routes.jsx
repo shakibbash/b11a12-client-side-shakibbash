@@ -21,6 +21,8 @@ import AdminProfile from "../pages/AdminPages/AdminProfile";
 import Announcement from "../pages/AdminPages/Announcement";
 import ReportedActivities from "../pages/AdminPages/ReportedActivities ";
 import ManageUsers from "../pages/AdminPages/ManageUsers";
+import Notifications from "../pages/Notications";
+import PrivateRoutes from "./PrivateRoute";
 
 // Admin pages
 
@@ -33,6 +35,7 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "post/:postId", element: <PrivateRoute><PostDetails /></PrivateRoute> },
+      {path:"/notifications", element:<PrivateRoute><Notifications /></PrivateRoute>},
       { path: "membership", element:<PrivateRoute><Membership /></PrivateRoute>  },
       { path: "payments", element:<PrivateRoute><Payment /></PrivateRoute>  },
     ],
