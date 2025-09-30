@@ -51,8 +51,9 @@ const Login = () => {
       const result = await signInWithGoogle();
       const user = result.user;
 
-      // Optional: update last_login if user exists
-      await axios.patch(`/users/${user.uid}`, { last_login: new Date() });
+
+     await axios.put(`/users/${user.email}`, { last_login: new Date() });
+
 
       Swal.fire("Welcome back!", "Logged in successfully", "success")
         .then(() => navigate(from, { replace: true }));
