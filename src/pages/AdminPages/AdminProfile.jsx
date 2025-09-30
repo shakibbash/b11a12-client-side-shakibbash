@@ -41,55 +41,41 @@ const AdminProfile = () => {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [recentAnnouncements, setRecentAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch stats
+  // Fetch all data in parallel
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axiosSecure.get("/admin/stats");
+        const [statsRes, tagsRes, announcementsRes] = await Promise.all([
+          axiosSecure.get("/admin/stats"),
+          axiosSecure.get("/tags"),
+          axiosSecure.get("/announcements?limit=5"),
+        ]);
+
         setStats({
-          posts: res.data.totalPosts,
-          comments: res.data.totalComments,
-          users: res.data.totalUsers,
+          posts: statsRes.data.totalPosts,
+          comments: statsRes.data.totalComments,
+          users: statsRes.data.totalUsers,
         });
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchStats();
-  }, [axiosSecure]);
 
-  // Fetch existing tags
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const res = await axiosSecure.get("/tags");
-        setTags(res.data);
+        setTags(tagsRes.data);
+        setRecentAnnouncements(announcementsRes.data);
       } catch (err) {
         console.error(err);
+        Swal.fire("Error", "Failed to load data", "error");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchTags();
-  }, [axiosSecure]);
 
-  // Fetch recent announcements
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        const res = await axiosSecure.get("/announcements?limit=5");
-        setRecentAnnouncements(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchAnnouncements();
+    fetchData();
   }, [axiosSecure]);
 
   const handleAddTag = async () => {
     if (!newTag.trim()) return;
     try {
-      const res = await axiosSecure.post("/tags", { tags: [newTag] });
-      // Re-fetch tags so _id comes from DB
+      await axiosSecure.post("/tags", { tags: [newTag] });
       const updated = await axiosSecure.get("/tags");
       setTags(updated.data);
       setNewTag("");
@@ -100,7 +86,6 @@ const AdminProfile = () => {
     }
   };
 
-  // REMOVE TAG FUNCTION
   const handleRemoveTag = async (tagId) => {
     try {
       await axiosSecure.delete(`/tags/${tagId}`);
@@ -123,6 +108,26 @@ const AdminProfile = () => {
     { name: "Comments", value: stats.comments },
     { name: "Users", value: stats.users },
   ];
+
+  if (loading) {
+    // Loading skeleton
+    return (
+      <div className="p-4 md:p-6 space-y-6 animate-pulse">
+        <div className="bg-gray-300 h-32 rounded-xl"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-gray-300 h-24 rounded-xl"></div>
+          <div className="bg-gray-300 h-24 rounded-xl"></div>
+          <div className="bg-gray-300 h-24 rounded-xl"></div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-gray-300 h-64 rounded-xl"></div>
+          <div className="bg-gray-300 h-64 rounded-xl"></div>
+        </div>
+        <div className="bg-gray-300 h-32 rounded-xl"></div>
+        <div className="bg-gray-300 h-32 rounded-xl"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -222,7 +227,7 @@ const AdminProfile = () => {
         </div>
       </div>
 
-      {/* Quick Actions Linear Cards */}
+      {/* Quick Actions */}
       <div className="grid gap-4 my-6 sm:my-10 bg-white rounded-2xl p-4 sm:p-6">
         <h3 className="font-bold text-lg sm:text-xl mb-2 flex items-center gap-2 justify-center">
           <FaUserShield /> Quick Actions
@@ -287,7 +292,10 @@ const AdminProfile = () => {
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
           />
-          <button className="btn btn-primary text-sm sm:text-base whitespace-nowrap">
+          <button
+            className="btn btn-primary text-sm sm:text-base whitespace-nowrap"
+            onClick={handleAddTag}
+          >
             Add
           </button>
         </div>
@@ -314,7 +322,7 @@ const AdminProfile = () => {
         <h3 className="font-bold mb-4 flex justify-center items-center gap-2 text-sm sm:text-base">
           <FaBullhorn /> Recent Announcements
         </h3>
-        <AnnouncementsLists />
+        <AnnouncementsLists announcements={recentAnnouncements} />
       </div>
     </div>
   );
