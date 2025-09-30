@@ -33,8 +33,8 @@ const Login = () => {
       const userCredential = await signIn(data.email, data.password);
       const user = userCredential.user;
 
-      // Optional: update last_login
-      await axios.patch(`/users/${user.uid}`, { last_login: new Date() });
+  
+      await axios.put(`/users/${user.email}`, { last_login: new Date() });
 
       Swal.fire("Welcome back!", "Logged in successfully", "success")
         .then(() => navigate(from, { replace: true }));
