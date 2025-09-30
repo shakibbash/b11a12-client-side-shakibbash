@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
 import { MdForum } from 'react-icons/md';
 import Lottie from 'lottie-react';
@@ -16,6 +16,9 @@ const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const axios = useAxiosSecure();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -59,9 +62,10 @@ const Login = () => {
                  Bronze badge awarded!`,
           icon: "success",
           confirmButtonText: "Awesome!",
-        }).then(() => navigate("/"));
+        }).then(() => navigate(from, { replace: true }));
       } else {
-        Swal.fire("Welcome back!", "Logged in successfully", "success").then(() => navigate("/"));
+        Swal.fire("Welcome back!", "Logged in successfully", "success")
+          .then(() => navigate(from, { replace: true }));
       }
 
     } catch (error) {
@@ -107,7 +111,7 @@ const Login = () => {
           : "Welcome back!",
         icon: "success",
         confirmButtonText: "Awesome!",
-      }).then(() => window.location.href = "/");
+      }).then(() => navigate(from, { replace: true }));
 
     } catch (error) {
       Swal.fire("Error", error.message, "error");
