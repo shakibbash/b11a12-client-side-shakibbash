@@ -46,7 +46,7 @@ const Announcement = () => {
         setUserInfo(res.data);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to fetch user info");
+  
       }
     };
     fetchUser();
@@ -60,7 +60,7 @@ const Announcement = () => {
         setAnnouncements(res.data);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load announcements");
+       
       } finally {
         setLoading(false);
       }

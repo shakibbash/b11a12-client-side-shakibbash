@@ -19,7 +19,7 @@ const AnnouncementsLists = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
 
-  // ✅ Fetch announcements
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
@@ -27,7 +27,7 @@ const AnnouncementsLists = () => {
         setAnnouncements(res.data);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load announcements");
+     
       } finally {
         setLoading(false);
       }
