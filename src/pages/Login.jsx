@@ -1,30 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router';
-import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
-import { MdForum } from 'react-icons/md';
-import Lottie from 'lottie-react';
-import loginAnimation from '../../Public/assets/login.json';
-import { useForm } from 'react-hook-form';
-import Swal from 'sweetalert2';
-import useAuth from '../Hooks/useAuth';
-import confetti from 'canvas-confetti'; 
-import useAxiosSecure from '../Hooks/useAxiosSecure';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router";
+import { useForm } from "react-hook-form";
+import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+import { MdForum } from "react-icons/md";
+import Swal from "sweetalert2";
+import useAuth from "../Hooks/useAuth";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
+import Lottie from "lottie-react";
+import loginAnimation from "../../Public/assets/login.json";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const axios = useAxiosSecure();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || "/";
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  // Initialize AOS
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);
@@ -35,39 +33,11 @@ const Login = () => {
       const userCredential = await signIn(data.email, data.password);
       const user = userCredential.user;
 
-      const userInfo = {
-        uid: user.uid,
-        name: user.displayName || "",
-        email: user.email,
-        photoURL: user.photoURL || "",
-        provider: "email",
-        role: "user",
-        badge: "bronze",
-        membership: false,
-        last_login: new Date(),
-        aboutMe: "",
-      };
+      // Optional: update last_login
+      await axios.patch(`/users/${user.uid}`, { last_login: new Date() });
 
-      const existingUser = await axios.get(`/users?email=${user.email}`);
-      if (existingUser.data.length === 0) {
-        await axios.post("/users", userInfo);
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        Swal.fire({
-          title: "Account Created!",
-          html: `<div class="flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-                  </svg>
-                 </div>
-                 Bronze badge awarded!`,
-          icon: "success",
-          confirmButtonText: "Awesome!",
-        }).then(() => navigate(from, { replace: true }));
-      } else {
-        Swal.fire("Welcome back!", "Logged in successfully", "success")
-          .then(() => navigate(from, { replace: true }));
-      }
-
+      Swal.fire("Welcome back!", "Logged in successfully", "success")
+        .then(() => navigate(from, { replace: true }));
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     } finally {
@@ -81,38 +51,11 @@ const Login = () => {
       const result = await signInWithGoogle();
       const user = result.user;
 
-      const userInfo = {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        role: "user",
-        badge: "bronze",
-        membership: false,
-        provider: "google",
-        last_login: new Date(),
-        aboutMe: "",
-      };
+      // Optional: update last_login if user exists
+      await axios.patch(`/users/${user.uid}`, { last_login: new Date() });
 
-      const res = await axios.post("/users", userInfo);
-      const isNewUser = res.status === 201;
-
-      if (isNewUser) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-
-      Swal.fire({
-        title: isNewUser ? "Account Created!" : "Signed in successfully!",
-        html: isNewUser
-          ? `<div class="flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-                </svg>
-             </div>
-             Bronze badge awarded!`
-          : "Welcome back!",
-        icon: "success",
-        confirmButtonText: "Awesome!",
-      }).then(() => navigate(from, { replace: true }));
-
+      Swal.fire("Welcome back!", "Logged in successfully", "success")
+        .then(() => navigate(from, { replace: true }));
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     } finally {
@@ -121,56 +64,54 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen mt-15 bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl w-full flex flex-col lg:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden">
 
         {/* Left Side - Login Form */}
         <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center" data-aos="fade-right">
-          <div className="max-w-md mx-auto">
-            <div className="text-center lg:text-left mb-8">
-              <Link to="/" className="inline-flex items-center space-x-2">
-                <div className="flex items-center space-x-2">
-                  <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 p-2 rounded-lg shadow-lg">
-                    <MdForum className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-400 bg-clip-text text-transparent">
-                    ForumX
-                  </div>
-                </div>
-              </Link>
-            </div>
+          <div className="max-w-md mx-auto text-center lg:text-left">
+            <Link to="/" className="inline-flex items-center space-x-2 mb-8">
+              <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 p-2 rounded-lg shadow-lg">
+                <MdForum className="w-8 h-8 text-white" />
+              </div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-indigo-400 bg-clip-text text-transparent">
+                ForumX
+              </div>
+            </Link>
 
             <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Welcome back</h2>
             <p className="text-gray-600 mb-8">Sign in to access your personalized forum feed</p>
 
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-              {/* Email */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type="email"
-                    {...register('email', { required: 'Email is required', pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' } })}
-                    className={`form-input block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                    {...register("email", { required: "Email is required" })}
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-lg`}
                     placeholder="Enter your email"
                   />
                 </div>
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                 <div className="relative">
                   <FaLock className="absolute left-3 top-3 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
-                    className={`form-input block w-full pl-10 pr-10 py-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                    type={showPassword ? "text" : "password"}
+                    {...register("password", { required: "Password is required" })}
+                    className={`block w-full pl-10 pr-10 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-lg`}
                     placeholder="Enter your password"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-400"
+                  >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
@@ -180,24 +121,25 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 font-medium transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? "Signing In..." : "Sign In"}
               </button>
             </form>
 
             {/* Divider */}
             <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
               <div className="relative flex justify-center text-sm text-gray-500">Or continue with</div>
             </div>
 
             {/* Google Sign-In */}
             <button
-              type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
+              className="w-full flex justify-center items-center py-3 px-4 border rounded-lg shadow-sm bg-white hover:bg-gray-50"
             >
               <FaGoogle className="h-5 w-5 text-red-500 mr-2" /> Continue with Google
             </button>
@@ -215,6 +157,7 @@ const Login = () => {
             <Lottie animationData={loginAnimation} loop={true} className="w-full h-full" />
           </div>
         </div>
+
       </div>
     </div>
   );
