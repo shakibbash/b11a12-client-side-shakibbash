@@ -47,23 +47,40 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, tagsRes, announcementsRes] = await Promise.all([
+        const results = await Promise.allSettled([
           axiosSecure.get("/admin/stats"),
           axiosSecure.get("/tags"),
           axiosSecure.get("/announcements?limit=5"),
         ]);
 
-        setStats({
-          posts: statsRes.data.totalPosts,
-          comments: statsRes.data.totalComments,
-          users: statsRes.data.totalUsers,
-        });
+        const [statsRes, tagsRes, announcementsRes] = results;
 
-        setTags(tagsRes.data);
-        setRecentAnnouncements(announcementsRes.data);
+        // Stats
+        if (statsRes.status === "fulfilled") {
+          setStats({
+            posts: statsRes.value.data.totalPosts,
+            comments: statsRes.value.data.totalComments,
+            users: statsRes.value.data.totalUsers,
+          });
+        } else {
+          console.warn("Stats failed to load:", statsRes.reason);
+        }
+
+        // Tags
+        if (tagsRes.status === "fulfilled") {
+          setTags(tagsRes.value.data);
+        } else {
+          console.warn("Tags failed to load:", tagsRes.reason);
+        }
+
+        // Announcements
+        if (announcementsRes.status === "fulfilled") {
+          setRecentAnnouncements(announcementsRes.value.data);
+        } else {
+          console.warn("Announcements failed to load:", announcementsRes.reason);
+        }
       } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "Failed to load data", "error");
+        console.error("Unexpected error:", err);
       } finally {
         setLoading(false);
       }
@@ -110,7 +127,6 @@ const AdminProfile = () => {
   ];
 
   if (loading) {
-    // Loading skeleton
     return (
       <div className="p-4 md:p-6 space-y-6 animate-pulse">
         <div className="bg-gray-300 h-32 rounded-xl"></div>
@@ -134,7 +150,10 @@ const AdminProfile = () => {
       {/* Profile Card */}
       <div className="bg-white shadow-lg rounded-xl p-4 md:p-6 flex flex-col sm:flex-row items-center gap-4 md:gap-6 border-l-4 sm:border-l-8 border-blue-500">
         <img
-          src={user?.photoURL || "https://via.placeholder.com/150"}
+          src={
+            user?.photoURL ||
+            "/fallback-avatar.png" // use local fallback image
+          }
           alt="Avatar"
           className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-blue-300"
         />
@@ -157,6 +176,7 @@ const AdminProfile = () => {
         </div>
       </div>
 
+     
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-white rounded-2xl p-4 sm:p-6">
         <div className="bg-green-100 p-3 sm:p-4 rounded-xl shadow flex items-center gap-3 sm:gap-4 hover:shadow-lg transition cursor-pointer border-r-4 sm:border-r-8 border-green-500">
@@ -322,7 +342,11 @@ const AdminProfile = () => {
         <h3 className="font-bold mb-4 flex justify-center items-center gap-2 text-sm sm:text-base">
           <FaBullhorn /> Recent Announcements
         </h3>
-        <AnnouncementsLists announcements={recentAnnouncements} />
+        {recentAnnouncements.length > 0 ? (
+          <AnnouncementsLists announcements={recentAnnouncements} />
+        ) : (
+          <p className="text-gray-500 text-center">No announcements available.</p>
+        )}
       </div>
     </div>
   );
