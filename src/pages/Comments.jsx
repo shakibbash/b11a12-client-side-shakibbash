@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAxiosSecure from "../Hooks/useAxiosSecure";
 import useAuth from "../Hooks/useAuth";
@@ -13,6 +13,7 @@ import {
   FaSearch
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { HiArrowLeft } from "react-icons/hi";
 
 const feedbackOptions = [
   "Spam or misleading",
@@ -25,7 +26,7 @@ const Comments = () => {
   const { user } = useAuth();
   const axios = useAxiosSecure();
   const queryClient = useQueryClient();
-
+const navigate=useNavigate()
   const [selectedFeedback, setSelectedFeedback] = useState({});
   const [reportedComments, setReportedComments] = useState({});
   const [modalComment, setModalComment] = useState("");
@@ -184,6 +185,13 @@ const Comments = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+     <button
+       onClick={() => navigate(-1)}
+       className="group flex items-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-lg transition-all duration-300 hover:shadow-md mb-6"
+     >
+       <HiArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
+       <span className="transition-all duration-300 group-hover:pl-1">Back to My Posts</span>
+     </button>
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">

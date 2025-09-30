@@ -1,52 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import {
-  FaGoogle,
-  FaEye,
-  FaEyeSlash,
-  FaEnvelope,
-  FaLock,
-  FaUser,
-} from "react-icons/fa";
-import { MdForum } from "react-icons/md";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import { MdForum } from "react-icons/md";
 import Swal from "sweetalert2";
 import confetti from "canvas-confetti";
 import useAuth from "../Hooks/useAuth";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
+import Lottie from "lottie-react";
+import bronzeBadge from "../../Public/assets/New Medal.json";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Register = () => {
   const { createUser, updateUserProfile, signInWithGoogle } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+  const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
-  // 📌 Handle Email/Password Registration
+  const { register: formRegister, handleSubmit, reset, formState: { errors } } = useForm();
+
+  // Initialize AOS
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
+
+  const validatePassword = (password) => {
+    if (password.length < 6) return "Password must be at least 6 characters long";
+    if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter";
+    if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter";
+    return "";
+  };
+
+  const showBadgeAlert = () => {
+    Swal.fire({
+      title: "Account Created!",
+      html: `<div id="lottie-container" style="width:200px;height:200px;margin:0 auto;"></div><p>Bronze badge awarded!</p>`,
+      showConfirmButton: true,
+      didOpen: () => {
+        const container = document.getElementById("lottie-container");
+        if (container) {
+          const div = document.createElement("div");
+          container.appendChild(div);
+          import("react-dom/client").then(ReactDOM => {
+            ReactDOM.createRoot(div).render(<Lottie animationData={bronzeBadge} loop={true} />);
+          });
+        }
+      },
+    }).then(() => navigate("/"));
+  };
+
   const onSubmit = async (data) => {
     try {
       const { name, email, password, photo } = data;
+      const validationError = validatePassword(password);
+      if (validationError) {
+        setPasswordError(validationError);
+        Swal.fire("Password Error", validationError, "error");
+        return;
+      }
 
-      // 1️⃣ Create Firebase user
       const userCredential = await createUser(email, password);
       const user = userCredential.user;
 
-      // 2️⃣ Update Firebase profile
       await updateUserProfile(user, {
         displayName: name,
         photoURL: photo?.[0] ? URL.createObjectURL(photo[0]) : "",
       });
 
-      // 3️⃣ Prepare user info for MongoDB
       const userInfo = {
         uid: user.uid,
-        name: name,
-        email: email,
+        name,
+        email,
         photoURL: photo?.[0] ? URL.createObjectURL(photo[0]) : "",
         role: "user",
         badge: "bronze",
@@ -56,24 +83,10 @@ const Register = () => {
         aboutMe: "",
       };
 
-      await axios.post("http://localhost:3000/users", userInfo);
+      await axiosSecure.post("/users", userInfo);
 
-      // ✅ Confetti + Bronze Badge Alert + Redirect to login
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      Swal.fire({
-        title: "Account Created!",
-        html: `
-          <div class="flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-            </svg>
-          </div>
-          Bronze badge awarded!`,
-        icon: "success",
-
-      }).then(() => {
-        navigate("/");
-      });
+      showBadgeAlert();
 
       reset();
     } catch (error) {
@@ -81,68 +94,41 @@ const Register = () => {
     }
   };
 
-const handleGoogleSignIn = async () => {
-  try {
-    const result = await signInWithGoogle();
-    const user = result.user;
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
 
-    // Prepare user info for MongoDB
-    const userInfo = {
-      uid: user.uid,
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: "user",
-      badge: "bronze",
-      membership: false,
-      provider: "google",
-      last_login: new Date(),
-      aboutMe: "",
-    };
+      const userInfo = {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        role: "user",
+        badge: "bronze",
+        membership: false,
+        provider: "google",
+        last_login: new Date(),
+        aboutMe: "",
+      };
 
-    // POST to /users → backend handles existing/new user
-    const res = await axios.post("http://localhost:3000/users", userInfo);
+      const res = await axiosSecure.post("/users", userInfo);
+      const isNewUser = res.status === 201;
 
-    const isNewUser = res.status === 201; // 201 = new user created
-
-    // Show confetti only for new users
-    if (isNewUser) {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      if (isNewUser) showBadgeAlert();
+      else Swal.fire("Signed in successfully!", "Welcome back!", "success").then(() => navigate("/"));
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
     }
-
-    // SweetAlert
-    Swal.fire({
-      title: isNewUser ? "Account Created!" : "Signed in successfully!",
-      html: isNewUser
-        ? `
-        <div class="flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-          </svg>
-        </div>
-        Bronze badge awarded!`
-        : "Welcome back!",
-      icon: "success",
-      confirmButtonText: "Awesome!",
-    }).then(() => {
-      // Redirect after closing SweetAlert
-      window.location.href = "/";
-    });
-
-  } catch (error) {
-    Swal.fire("Error", error.message, "error");
-  }
-};
-
-
-
-
+  };
 
   return (
-    <div className="min-h-screen mt-15 bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen mt-20 bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl w-full flex flex-col lg:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden">
+
         {/* Left Section */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 p-12 flex-col justify-center items-center text-white relative">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 p-12 flex-col justify-center items-center text-white relative" data-aos="fade-right">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="relative z-10 text-center">
             <MdForum className="w-24 h-24 mx-auto mb-6 text-indigo-100 animate-float" />
@@ -156,11 +142,9 @@ const handleGoogleSignIn = async () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center" data-aos="fade-left">
           <div className="max-w-md mx-auto">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-              Create your account
-            </h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Create your account</h2>
             <p className="text-gray-600 mb-8">
               Join ForumX to participate in discussions and connect with the community.
             </p>
@@ -168,13 +152,13 @@ const handleGoogleSignIn = async () => {
             {/* Registration Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
-              <div>
+              <div data-aos="fade-up">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                 <div className="relative">
                   <FaUser className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type="text"
-                    {...register("name", { required: true })}
+                    {...formRegister("name", { required: true })}
                     className="block w-full pl-10 pr-3 py-3 border rounded-lg"
                     placeholder="Enter your full name"
                   />
@@ -183,13 +167,13 @@ const handleGoogleSignIn = async () => {
               </div>
 
               {/* Email */}
-              <div>
+              <div data-aos="fade-up" data-aos-delay="100">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type="email"
-                    {...register("email", { required: true })}
+                    {...formRegister("email", { required: true })}
                     className="block w-full pl-10 pr-3 py-3 border rounded-lg"
                     placeholder="Enter your email"
                   />
@@ -198,19 +182,20 @@ const handleGoogleSignIn = async () => {
               </div>
 
               {/* Profile Photo */}
-              <div>
+              <div data-aos="fade-up" data-aos-delay="200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Profile Photo (Optional)</label>
-                <input type="file" {...register("photo")} accept="image/*" />
+                <input type="file" {...formRegister("photo")} accept="image/*" className="w-full file-input file-input-neutral" />
               </div>
 
               {/* Password */}
-              <div>
+              <div data-aos="fade-up" data-aos-delay="300">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                 <div className="relative">
                   <FaLock className="absolute left-3 top-3 text-gray-400" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    {...register("password", { required: true, minLength: 6 })}
+                    {...formRegister("password", { required: true })}
+                    onChange={(e) => setPasswordError(validatePassword(e.target.value))}
                     className="block w-full pl-10 pr-10 py-3 border rounded-lg"
                     placeholder="Enter your password"
                   />
@@ -222,36 +207,39 @@ const handleGoogleSignIn = async () => {
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
-                {errors.password && <p className="text-red-500 text-sm">Password must be at least 6 characters</p>}
+                {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+                {errors.password && <p className="text-red-500 text-sm">Password is required</p>}
               </div>
 
-              {/* Create Account */}
+              {/* Submit */}
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700"
+                disabled={!!passwordError}
+                className="w-full py-3 px-4 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 Create Account
               </button>
             </form>
 
             {/* Divider */}
-            <div className="relative my-6">
+            <div className="relative my-6" data-aos="fade-up" data-aos-delay="400">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm text-gray-500">Or continue with</div>
             </div>
 
-            {/* Google Sign Up */}
+            {/* Google */}
             <button
               onClick={handleGoogleSignIn}
               className="w-full flex justify-center items-center py-3 px-4 border rounded-lg shadow-sm bg-white hover:bg-gray-50"
+              data-aos="fade-up" data-aos-delay="500"
             >
               <FaGoogle className="h-5 w-5 text-red-500 mr-2" /> Continue with Google
             </button>
 
             {/* Sign In Link */}
-            <div className="mt-6 text-center text-sm text-gray-600">
+            <div className="mt-6 text-center text-sm text-gray-600" data-aos="fade-up" data-aos-delay="600">
               Already have an account?{" "}
               <Link to="/login" className="text-indigo-600 font-medium hover:underline">
                 Sign in

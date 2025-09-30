@@ -317,6 +317,18 @@ const Home = () => {
           <FaStar /> Sort by Popularity
         </button>
       </div>
+{/* Posts Heading */}
+<div className="mb-6 flex items-center justify-center gap-3">
+  <MdForum className="text-indigo-600 w-8 h-8" /> 
+  <h2 className="text-3xl font-bold text-gray-800">
+    {selectedTag
+      ? `Posts tagged: "${selectedTag}"`
+      : postSearchQuery
+      ? `Search Results for: "${postSearchQuery}"`
+      : "Latest Posts"}
+  </h2>
+</div>
+
 
       {/* Posts Grid */}
       {loading || searchLoading ? (

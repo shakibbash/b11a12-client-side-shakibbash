@@ -23,6 +23,7 @@ import ReportedActivities from "../pages/AdminPages/ReportedActivities ";
 import ManageUsers from "../pages/AdminPages/ManageUsers";
 import Notifications from "../pages/Notications";
 import PrivateRoutes from "./PrivateRoute";
+import AboutMe from "../pages/AboutMe";
 
 // Admin pages
 
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       {path:"/notifications", element:<PrivateRoute><Notifications /></PrivateRoute>},
       { path: "membership", element:<PrivateRoute><Membership /></PrivateRoute>  },
       { path: "payments", element:<PrivateRoute><Payment /></PrivateRoute>  },
+       { path: "about", element:<AboutMe></AboutMe> }
     ],
   },
   {

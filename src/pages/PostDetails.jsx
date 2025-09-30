@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,7 +10,8 @@ import {
   HiBookmark, 
   HiUserAdd, 
   HiLink,
-  HiOutlineShare
+  HiOutlineShare,
+  HiArrowLeft
 } from "react-icons/hi";
 import { TbArrowBigUp, TbArrowBigDown } from "react-icons/tb";
 import { Dialog } from "@headlessui/react";
@@ -41,7 +42,7 @@ const PostDetails = () => {
   const [replyInputs, setReplyInputs] = useState({});
   const [showReplyInput, setShowReplyInput] = useState({});
   const [editInputs, setEditInputs] = useState({});
-
+ const navigate=useNavigate()
   // Fetch post
   const { data: post, isLoading: postLoading } = useQuery({
     queryKey: ["post", postId],
@@ -176,6 +177,13 @@ const PostDetails = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6 my-20">
+<button
+  onClick={() => navigate(-1)}
+  className="group flex items-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-lg transition-all duration-300 hover:shadow-md mb-6"
+>
+  <HiArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
+  <span className="transition-all duration-300 group-hover:pl-1">Back to Home</span>
+</button>
       {/* Post Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Author Header */}

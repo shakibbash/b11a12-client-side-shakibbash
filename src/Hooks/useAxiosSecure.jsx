@@ -1,12 +1,10 @@
 import React from 'react'
 import axios from 'axios'
-
 import { useNavigate } from 'react-router'
 import useAuth from './useAuth'
 
-// useAxiosSecure() is used whenever you need authenticated requests with Firebase or JWT, and want automatic error handling.
 const axiosSecure = axios.create({
-    baseURL : `http://localhost:3000`
+  baseURL: `https://forum-x-server.vercel.app`
 })
 
 const useAxiosSecure = () => {
@@ -14,41 +12,52 @@ const useAxiosSecure = () => {
   const navigate = useNavigate()
 
   // Request interceptor - Add JWT token
-  axiosSecure.interceptors.request.use(async (config) => {
-    if (user) {
-      try {
-        // Get fresh Firebase ID token
-        const token = await user.getIdToken()
-        config.headers.authorization = `Bearer ${token}`
-        // console.log(token)
-      } catch (error) {
-        console.error('Error getting token:', error)
-      }
-    }
-    return config
-  }, (error) => {
-    return Promise.reject(error)
-  })
+  axiosSecure.interceptors.request.use(
+    async (config) => {
+      let token = localStorage.getItem("firebase-token")
 
-axiosSecure.interceptors.response.use(
-  res => res,
-  async (error) => {
-    const status = error.response?.status;
-    
-    if (status === 401 && user) {
-      try {
-        const token = await user.getIdToken(true); // force refresh
-        error.config.headers.authorization = `Bearer ${token}`;
-        return axiosSecure(error.config); // retry the original request
-      } catch {
-        await logOut();
-        navigate('/login');
+      if (user && !token) {
+        try {
+          // Get fresh Firebase ID token if not in localStorage
+          token = await user.getIdToken()
+          localStorage.setItem("firebase-token", token)
+        } catch (error) {
+          console.error("Error getting token:", error)
+        }
       }
+
+      if (token) {
+        config.headers.authorization = `Bearer ${token}`
+      }
+      return config
+    },
+    (error) => Promise.reject(error)
+  )
+
+  // Response interceptor - handle expired/unauthorized tokens
+  axiosSecure.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+      const status = error.response?.status
+
+      if (status === 401 && user) {
+        try {
+          // force refresh token
+          const newToken = await user.getIdToken(true)
+          localStorage.setItem("firebase-token", newToken)
+
+          error.config.headers.authorization = `Bearer ${newToken}`
+          return axiosSecure(error.config)
+        } catch {
+          localStorage.removeItem("firebase-token")
+          await logOut()
+          navigate("/login")
+        }
+      }
+      return Promise.reject(error)
     }
-    return Promise.reject(error);
-  }
-);
-  
+  )
+
   return axiosSecure
 }
 

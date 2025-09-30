@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
 import { MdForum } from 'react-icons/md';
@@ -7,72 +7,70 @@ import loginAnimation from '../../Public/assets/login.json';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 import useAuth from '../Hooks/useAuth';
-import axios from 'axios';
 import confetti from 'canvas-confetti'; 
+import useAxiosSecure from '../Hooks/useAxiosSecure';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
+  const axios = useAxiosSecure();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  // Email/password login
-// Email/password login
-const onSubmit = async (data) => {
-  setLoading(true);
-  try {
-    const userCredential = await signIn(data.email, data.password);
-    const user = userCredential.user;
+  // Initialize AOS
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
 
-    const userInfo = {
-      uid: user.uid,
-      name: user.displayName || "",
-      email: user.email,
-      photoURL: user.photoURL || "",
-      provider: "email",
-      role: "user",
-      badge: "bronze",
-      membership: false,
-      last_login: new Date(),
-      aboutMe: "",
-    };
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const userCredential = await signIn(data.email, data.password);
+      const user = userCredential.user;
 
-    // 1️⃣ Check if user already exists
-    const existingUser = await axios.get(`/users?email=${user.email}`);
+      const userInfo = {
+        uid: user.uid,
+        name: user.displayName || "",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        provider: "email",
+        role: "user",
+        badge: "bronze",
+        membership: false,
+        last_login: new Date(),
+        aboutMe: "",
+      };
 
-    if (existingUser.data.length === 0) {
-      // First-time registration
-      await axios.post("/users", userInfo);
+      const existingUser = await axios.get(`/users?email=${user.email}`);
+      if (existingUser.data.length === 0) {
+        await axios.post("/users", userInfo);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        Swal.fire({
+          title: "Account Created!",
+          html: `<div class="flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
+                  </svg>
+                 </div>
+                 Bronze badge awarded!`,
+          icon: "success",
+          confirmButtonText: "Awesome!",
+        }).then(() => navigate("/"));
+      } else {
+        Swal.fire("Welcome back!", "Logged in successfully", "success").then(() => navigate("/"));
+      }
 
-      // Show confetti + Bronze badge
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      Swal.fire({
-        title: "Account Created!",
-        html: `<div class="flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3 7h7l-5.5 4.5 2 7-6-4-6 4 2-7L2 9h7l3-7z"/>
-                </svg>
-               </div>
-               Bronze badge awarded!`,
-        icon: "success",
-        confirmButtonText: "Awesome!",
-      }).then(() => navigate("/"));
-    } else {
-      // Existing user → normal login
-      Swal.fire("Welcome back!", "Logged in successfully", "success").then(() => navigate("/"));
+    } catch (error) {
+      Swal.fire("Error", error.message, "error");
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } catch (error) {
-    Swal.fire("Error", error.message, "error");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // Google login
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
@@ -95,9 +93,7 @@ const onSubmit = async (data) => {
       const res = await axios.post("/users", userInfo);
       const isNewUser = res.status === 201;
 
-      if (isNewUser) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      }
+      if (isNewUser) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
       Swal.fire({
         title: isNewUser ? "Account Created!" : "Signed in successfully!",
@@ -111,9 +107,7 @@ const onSubmit = async (data) => {
           : "Welcome back!",
         icon: "success",
         confirmButtonText: "Awesome!",
-      }).then(() => {
-        window.location.href = "/";
-      });
+      }).then(() => window.location.href = "/");
 
     } catch (error) {
       Swal.fire("Error", error.message, "error");
@@ -127,7 +121,7 @@ const onSubmit = async (data) => {
       <div className="max-w-6xl w-full flex flex-col lg:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden">
 
         {/* Left Side - Login Form */}
-        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center" data-aos="fade-right">
           <div className="max-w-md mx-auto">
             <div className="text-center lg:text-left mb-8">
               <Link to="/" className="inline-flex items-center space-x-2">
@@ -211,7 +205,7 @@ const onSubmit = async (data) => {
         </div>
 
         {/* Right Side - Lottie Animation */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-r-2xl relative">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-r-2xl relative" data-aos="fade-left">
           <div className="absolute inset-0 bg-black opacity-10 rounded-r-2xl"></div>
           <div className="relative w-full h-full flex justify-center items-center p-12">
             <Lottie animationData={loginAnimation} loop={true} className="w-full h-full" />

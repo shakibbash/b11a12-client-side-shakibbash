@@ -183,7 +183,7 @@ const Profile = () => {
         </div>
         
       )}
-<span className='ml-5 bg-amber-400 px-3 py-1 text-sm rounded-4xl'>badge</span>
+<span className='ml-5 hidden md:block bg-amber-400 px-3 py-1 text-sm rounded-4xl'>badge</span>
     </div>
 
     <p className="text-gray-600 md:text-lg mt-2 md:mt-0">

@@ -50,7 +50,7 @@ const DashboardLayout = () => {
 
   //  User Sidebar Links
   const userMenuItems = [
-    { key: "dashboard", icon: <FaTachometerAlt />, label: "Dashboard", link: "/dashboard" },
+   
     { key: "profile", icon: <FaUser />, label: "My Profile", link: "profile" },
     { key: "add-post", icon: <FaPlusCircle />, label: "Add Post", link: "add-post" },
     { key: "my-post", icon: <FaFileAlt />, label: "My Posts", link: "my-post" },

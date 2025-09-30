@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { FaBullhorn, FaEdit, FaTrash, FaAlignLeft, FaPaperPlane, FaPlus } from "react-icons/fa";
+import {
+  FaBullhorn,
+  FaEdit,
+  FaTrash,
+  FaAlignLeft,
+  FaPaperPlane,
+  FaPlus,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useUserRole from "../../Hooks/useUserRole";
@@ -33,7 +40,9 @@ const Announcement = () => {
     if (!user?.email) return;
     const fetchUser = async () => {
       try {
-        const res = await axiosSecure.get(`/users/${encodeURIComponent(user.email)}`);
+        const res = await axiosSecure.get(
+          `/users/${encodeURIComponent(user.email)}`
+        );
         setUserInfo(res.data);
       } catch (err) {
         console.error(err);
@@ -60,50 +69,45 @@ const Announcement = () => {
   }, [axiosSecure]);
 
   // Add new announcement
- const handleSubmit = async () => {
-  if (!title || !description) {
-    toast.error("Please fill in both Title and Description");
-    return;
-  }
-  if (!userInfo) return;
+  const handleSubmit = async () => {
+    if (!title || !description) {
+      toast.error("Please fill in both Title and Description");
+      return;
+    }
+    if (!userInfo) return;
 
-  setSubmitting(true);
+    setSubmitting(true);
 
-  const newAnnouncement = {
-    authorName: userInfo.displayName,
-    authorImage: userInfo.photoURL || "https://i.pravatar.cc/40",
-    email: userInfo.email,
-    title,
-    description,
-    createdAt: new Date(), // make sure it's a Date object
+    const newAnnouncement = {
+      authorName: userInfo.displayName,
+      authorImage: userInfo.photoURL || "https://i.pravatar.cc/40",
+      email: userInfo.email,
+      title,
+      description,
+      createdAt: new Date(),
+    };
+
+    try {
+      setAnnouncements((prev) => [newAnnouncement, ...prev]);
+
+      const res = await axiosSecure.post("/announcements", newAnnouncement);
+
+      setAnnouncements((prev) =>
+        prev.map((a) => (a === newAnnouncement ? res.data : a))
+      );
+
+      toast.success("Announcement posted successfully!");
+      setTitle("");
+      setDescription("");
+      document.getElementById("add_modal").close();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to post announcement");
+      setAnnouncements((prev) => prev.filter((a) => a !== newAnnouncement));
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-  try {
-    // Optimistically update UI first
-    setAnnouncements((prev) => [newAnnouncement, ...prev]);
-
-    const res = await axiosSecure.post("/announcements", newAnnouncement);
-
-
-    setAnnouncements((prev) =>
-      prev.map((a) => (a === newAnnouncement ? res.data : a))
-    );
-
-    toast.success("Announcement posted successfully!");
-    setTitle("");
-    setDescription("");
-    document.getElementById("add_modal").close();
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to post announcement");
-
-
-    setAnnouncements((prev) => prev.filter((a) => a !== newAnnouncement));
-  } finally {
-    setSubmitting(false);
-  }
-};
-
 
   // Delete announcement
   const handleDelete = async (id) => {
@@ -169,19 +173,26 @@ const Announcement = () => {
     }
   };
 
-  if (loading) return <p className="text-center text-gray-500 mt-6">Loading announcements...</p>;
+  if (loading)
+    return (
+      <p className="text-center text-gray-500 mt-6">
+        Loading announcements...
+      </p>
+    );
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <div className="flex items-center gap-3">
           <FaBullhorn className="text-3xl text-blue-600" />
-          <h2 className="text-3xl font-bold text-gray-800">Announcements</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Announcements
+          </h2>
         </div>
         {isAdmin && (
           <button
-            className="btn btn-primary flex items-center gap-2"
+            className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
             onClick={() => document.getElementById("add_modal").showModal()}
           >
             <FaPlus /> Add Announcement
@@ -191,15 +202,15 @@ const Announcement = () => {
 
       {/* Announcements List */}
       {announcements.length === 0 ? (
-     <div className="rounded-xl bg-white p-5">
-         <p className="text-gray-500 text-center">No announcements found.</p>
-     </div>
+        <div className="rounded-xl bg-white p-5">
+          <p className="text-gray-500 text-center">No announcements found.</p>
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {announcements.map((a, idx) => (
             <div
               key={a._id || `announcement-${idx}`}
-              className="bg-white shadow-md rounded-lg p-6 border border-gray-200"
+              className="bg-white shadow-md rounded-lg p-6 border border-gray-200 flex flex-col justify-between"
             >
               {/* Author Info */}
               <div className="flex items-center gap-3 mb-3">
@@ -209,20 +220,30 @@ const Announcement = () => {
                   className="w-10 h-10 rounded-full"
                 />
                 <div>
-                  <p className="font-medium text-gray-700">{a.authorName || "Unknown"}</p>
+                  <p className="font-medium text-gray-700">
+                    {a.authorName || "Unknown"}
+                  </p>
                   <p className="text-xs text-gray-400">
-                    {a.createdAt ? new Date(a.createdAt).toLocaleString() : ""}
+                    {a.createdAt
+                      ? new Date(a.createdAt).toLocaleString()
+                      : ""}
                   </p>
                 </div>
               </div>
 
               {/* Announcement */}
-              <h3 className="text-xl font-semibold text-gray-800">{a.title || ""}</h3>
-              <p className="text-gray-600">{a.description || ""}</p>
+              <div className="flex-1">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  {a.title || ""}
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  {a.description || ""}
+                </p>
+              </div>
 
               {/* Admin Actions */}
               {isAdmin && (
-                <div className="flex gap-3 mt-4">
+                <div className="flex flex-wrap gap-3 mt-4">
                   <button
                     onClick={() => handleEdit(a)}
                     className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 text-sm"
@@ -234,7 +255,8 @@ const Announcement = () => {
                     className="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full hover:bg-red-200 text-sm"
                     disabled={deleting === a._id}
                   >
-                    <FaTrash /> {deleting === a._id ? "Deleting..." : "Delete"}
+                    <FaTrash />{" "}
+                    {deleting === a._id ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               )}
@@ -259,8 +281,12 @@ const Announcement = () => {
                   className="w-12 h-12 rounded-full ring-2 ring-blue-400"
                 />
                 <div>
-                  <span className="font-semibold text-gray-800">{userInfo.displayName || ""}</span>
-                  <span className="text-sm text-gray-500">{userInfo.email || ""}</span>
+                  <span className="font-semibold text-gray-800">
+                    {userInfo.displayName || ""}
+                  </span>
+                  <span className="block text-sm text-gray-500">
+                    {userInfo.email || ""}
+                  </span>
                 </div>
               </div>
             )}
@@ -295,11 +321,14 @@ const Announcement = () => {
               type="button"
               onClick={handleSubmit}
               className={`w-full py-2 rounded-lg text-white font-semibold flex items-center justify-center gap-2 transition ${
-                submitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-md"
+                submitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 shadow-md"
               }`}
               disabled={submitting}
             >
-              <FaPaperPlane /> {submitting ? "Posting..." : "Post Announcement"}
+              <FaPaperPlane />{" "}
+              {submitting ? "Posting..." : "Post Announcement"}
             </button>
           </form>
 
