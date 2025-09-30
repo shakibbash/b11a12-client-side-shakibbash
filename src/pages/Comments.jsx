@@ -190,7 +190,7 @@ const navigate=useNavigate()
        className="group flex items-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-lg transition-all duration-300 hover:shadow-md mb-6"
      >
        <HiArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
-       <span className="transition-all duration-300 group-hover:pl-1">Back to My Posts</span>
+       <span className="transition-all duration-300 group-hover:pl-1">Back to My Post</span>
      </button>
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-4">

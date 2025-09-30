@@ -1,96 +1,69 @@
+# Forum-X: MERN Forum Platform
 
-# React + Vite + Tailwind CSS + React Router Boilerplate
+**Live Site:** [Forum-X Client](https://forum-x-auth.web.app)  
+**Server API:** [Server](https://forum-x-server.vercel.app)
 
-> **⚠️ WARNING:**
-> Do **NOT** use `npm i react-twd-router-bp` to install this package. This is a CLI tool and should be run with `npx react-twd-router-bp`.
-> Using `npm i` will not scaffold your project and is not the intended usage.
+---
 
-This boilerplate provides a ready-to-use setup for building React applications with Vite, Tailwind CSS, and React Router. It includes basic routing, ESLint configuration, and a clean project structure to help you start quickly and customize to your style.
+## Project Overview
+Forum-X is an interactive online forum built with the **MERN stack (MongoDB, Express, React, Node.js)**. Users can post, comment, upvote/downvote, and engage with a dynamic community. The platform supports **membership tiers, badges, notifications, admin dashboard, announcements**, and a fully responsive UI for desktop, tablet, and mobile.
 
-## Features
-- ⚡ Fast development with Vite
-- 🎨 Tailwind CSS for utility-first styling
-- 🚦 React Router for client-side routing
-- 🧹 ESLint for code quality
-- 📁 Organized folder structure (`src/pages`, `src/routes`, etc.)
+This project demonstrates **full-stack development, role-based access control, user authentication**, and modern web technologies.
 
-## Getting Started
+---
 
+## Key Features
 
+### User Features
+- Register/Login (Email + Social login)  
+- Profile with badges (Bronze/Gold)  
+- Create posts with tags (up to 5 posts for normal users)  
+- Search posts by tags & sort by popularity  
+- Comment on posts (multiple comments per user)  
+- Share posts via social media (react-share)  
+- Membership system to unlock unlimited posts  
+- Notifications & announcements  
+- Fully responsive design (mobile, tablet, desktop)  
 
+### Dashboard Features
 
+#### User Dashboard
+- Profile view (recent posts, badges)  
+- Add post form (limited by membership)  
+- View/manage posts  
+- Comment management with feedback/reporting  
 
-## Usage
+#### Admin Dashboard
+- Manage users (Make Admin, Subscription status)  
+- Handle reported comments/activities (**ReportedActivities component**):  
+  - View all reported comments with details (author, reporter, reason, date, status)  
+  - **Search & Filter** reports by user, comment, reason, or status  
+  - **Pagination** for large datasets  
+  - **Take actions on reports:**  
+    - Mark as Reviewed  
+    - Delete Comment  
+    - Warn User  
+    - Dismiss Report  
+  - Visual **status badges** for quick reference  
+- Make announcements  
+- View site statistics (posts, comments, users)  
+- Add tags for posts  
 
-To scaffold a new React + Vite + Tailwind CSS + React Router project, run:
+---
 
-```
-npx react-twd-boiler
-```
+## Technologies Used
+- **Frontend:** React.js, Tailwind CSS, React Hook Form, React Query (Tanstack Query), React-Select, React-Share  
+- **Backend:** Node.js, Express.js, MongoDB, JWT for authentication  
+- **Deployment:** Firebase Hosting (client), Vercel (server)  
+- **Other:** Axios, dotenv for environment variables  
 
-### Setup Steps
+---
 
-1. **Project Name:**  
-	The CLI will prompt:  
-	`What will your project name be?`
+## Installation & Setup
 
-2. **Latest Packages Only:**  
-	The CLI will always install the latest versions of React, Tailwind CSS, and React Router. There is no option to select specific versions.
-
-3. **Project Creation:**  
-	The CLI will copy the boilerplate files, update dependencies, and install everything automatically.
-
-### Start Development Server
-
-
-```
-cd <your-project-name>
+### Frontend
+```bash
+git clone https://github.com/YourUsername/forum-x-client.git
+cd forum-x-client
+npm install
 npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173) to view your app.
-
-## Project Structure
-
-```
-├── public/
-├── src/
-│   ├── assets/
-│   ├── pages/
-│   │   ├── Home.jsx
-│   │   └── Error.jsx
-│   ├── routes/
-│   │   └── Routes.jsx
-│   ├── index.css
-│   └── main.jsx
-├── package.json
-├── README.md
-├── vite.config.js
-└── ...
-```
-
-## Customization
-
-- Add new pages in `src/pages` and update `src/routes/Routes.jsx` for routing.
-- Customize styles in `src/index.css` and Tailwind config.
-- Update ESLint rules in `eslint.config.js` as needed.
-
-## Tailwind CSS Setup
-
-Tailwind is already configured. Use its utility classes in your components. For custom configuration, edit `tailwind.config.js`.
-
-## Build for Production
-
-```
-npm run build
-```
-
-## Linting
-
-```
-npm run lint
-```
-
-## License
-
-MIT
