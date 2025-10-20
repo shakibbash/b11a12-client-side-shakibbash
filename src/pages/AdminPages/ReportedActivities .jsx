@@ -160,9 +160,16 @@ const ReportedActivities = () => {
   };
 
   if (isLoading) return (
-    <div className="flex justify-center items-center min-h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>
+     <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-indigo-200 rounded-full"></div>
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+        </div>
+        <p className="text-gray-600 mt-4 font-medium">
+        Loading 
+        </p>
+        <p className="text-gray-400 text-sm mt-2">Please wait a moment</p>
+      </div>
   );
 
   return (

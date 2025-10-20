@@ -4,83 +4,74 @@ import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
 import Swal from "sweetalert2";
 import {
+  FaUsers,
+  FaFileAlt,
+  FaCrown,
+  FaMoneyCheck,
+  FaChartPie,
+  FaChartLine,
+  FaUserShield,
+  FaBullhorn,
+  FaTags,
+  FaComments,
+  FaTimes,
+} from "react-icons/fa";
+import {
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
-import {
-  FaUsers,
-  FaFileAlt,
-  FaComments,
-  FaTags,
-  FaChartPie,
-  FaChartBar,
-  FaUserShield,
-  FaBullhorn,
-  FaTimes,
-} from "react-icons/fa";
 import AnnouncementsLists from "./AnnouncementLists";
-
-const COLORS = ["#4ade80", "#60a5fa", "#facc15"]; // green, blue, yellow
-const DARK_BG = "#1f2937";
-const DARK_TEXT = "#f3f4f6";
 
 const AdminProfile = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
 
-  const [stats, setStats] = useState({ posts: 0, comments: 0, users: 0 });
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    bronzeUsers: 0,
+    goldenUsers: 0,
+    totalPosts: 0,
+    totalComments: 0,
+  });
+  const [payments, setPayments] = useState([]);
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [recentAnnouncements, setRecentAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all data in parallel
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const results = await Promise.allSettled([
-          axiosSecure.get("/admin/stats"),
-          axiosSecure.get("/tags"),
-          axiosSecure.get("/announcements?limit=5"),
-        ]);
+        const [statsRes, paymentsRes, tagsRes, announcementsRes] =
+          await Promise.all([
+            axiosSecure.get("/stats/counts"),
+            axiosSecure.get("/membership-payments"),
+            axiosSecure.get("/tags"),
+            axiosSecure.get("/announcements?limit=5"),
+          ]);
 
-        const [statsRes, tagsRes, announcementsRes] = results;
-
-        // Stats
-        if (statsRes.status === "fulfilled") {
-          setStats({
-            posts: statsRes.value.data.totalPosts,
-            comments: statsRes.value.data.totalComments,
-            users: statsRes.value.data.totalUsers,
-          });
-        } else {
-          console.warn("Stats failed to load:", statsRes.reason);
-        }
-
-        // Tags
-        if (tagsRes.status === "fulfilled") {
-          setTags(tagsRes.value.data);
-        } else {
-          console.warn("Tags failed to load:", tagsRes.reason);
-        }
-
-        // Announcements
-        if (announcementsRes.status === "fulfilled") {
-          setRecentAnnouncements(announcementsRes.value.data);
-        } else {
-          console.warn("Announcements failed to load:", announcementsRes.reason);
-        }
+        setStats(statsRes.data || {});
+        setPayments(paymentsRes.data?.data || []);
+        setTags(tagsRes.data || []);
+        setRecentAnnouncements(announcementsRes.data || []);
       } catch (err) {
-        console.error("Unexpected error:", err);
+        console.error("Error fetching data:", err);
+        Swal.fire(
+          "Error",
+          "Failed to load dashboard data",
+          "error"
+        );
       } finally {
         setLoading(false);
       }
@@ -89,17 +80,55 @@ const AdminProfile = () => {
     fetchData();
   }, [axiosSecure]);
 
+  // Safe total revenue
+  const totalRevenue =
+    payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+  // Revenue chart data
+  const revenueData = payments.slice(0, 6).map((p) => ({
+    date: new Date(p.date || p.createdAt || Date.now()).toLocaleDateString(),
+    revenue: p.amount || 0,
+  }));
+
+ // Membership distribution
+
+const membershipData = [
+  { name: "Gold Members", value: stats.goldenUsers || 0, color: "#6366f1" }, 
+  { name: "Bronze Members", value: stats.bronzeUsers || 0, color: "#4f46e5" }, 
+  {
+    name: "Regular Users",
+    value: Math.max(
+      0,
+      (stats.totalUsers || 0) - ((stats.goldenUsers || 0) + (stats.bronzeUsers || 0))
+    ),
+    color: "#4338ca", // Indigo-700
+  },
+];
+
+
+
+  const activityData = [
+    { name: "Posts", value: stats.totalPosts || 0, color: "#4f46e5" },
+    { name: "Comments", value: stats.totalComments || 0, color: "#10b981" },
+    { name: "Users", value: stats.totalUsers || 0, color: "#f59e0b" },
+  ];
+
+  // Tag management
   const handleAddTag = async () => {
     if (!newTag.trim()) return;
     try {
       await axiosSecure.post("/tags", { tags: [newTag] });
       const updated = await axiosSecure.get("/tags");
-      setTags(updated.data);
+      setTags(updated.data || []);
       setNewTag("");
       Swal.fire("Success", "Tag added successfully", "success");
     } catch (err) {
       console.error(err);
-      Swal.fire("Error", err.response?.data?.message || "Failed to add tag", "error");
+      Swal.fire(
+        "Error",
+        err.response?.data?.message || "Failed to add tag",
+        "error"
+      );
     }
   };
 
@@ -114,240 +143,278 @@ const AdminProfile = () => {
     }
   };
 
-  const pieData = [
-    { name: "Posts", value: stats.posts },
-    { name: "Comments", value: stats.comments },
-    { name: "Users", value: stats.users },
-  ];
-
-  const barData = [
-    { name: "Posts", value: stats.posts },
-    { name: "Comments", value: stats.comments },
-    { name: "Users", value: stats.users },
-  ];
-
   if (loading) {
     return (
-      <div className="p-4 md:p-6 space-y-6 animate-pulse">
-        <div className="bg-gray-300 h-32 rounded-xl"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-gray-300 h-24 rounded-xl"></div>
-          <div className="bg-gray-300 h-24 rounded-xl"></div>
-          <div className="bg-gray-300 h-24 rounded-xl"></div>
+       <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-indigo-200 rounded-full"></div>
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-gray-300 h-64 rounded-xl"></div>
-          <div className="bg-gray-300 h-64 rounded-xl"></div>
-        </div>
-        <div className="bg-gray-300 h-32 rounded-xl"></div>
-        <div className="bg-gray-300 h-32 rounded-xl"></div>
+        <p className="text-gray-600 mt-4 font-medium">
+        Loading Dashboard
+        </p>
+        <p className="text-gray-400 text-sm mt-2">Please wait a moment</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      {/* Profile Card */}
-      <div className="bg-white shadow-lg rounded-xl p-4 md:p-6 flex flex-col sm:flex-row items-center gap-4 md:gap-6 border-l-4 sm:border-l-8 border-blue-500">
-        <img
-          src={
-            user?.photoURL ||
-            "/fallback-avatar.png" // use local fallback image
-          }
-          alt="Avatar"
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-blue-300"
-        />
-        <div className="flex-1 text-center sm:text-left">
-          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2 justify-center sm:justify-start">
-            <FaUserShield /> {user?.displayName}
-          </h2>
-          <p className="text-gray-500 text-sm sm:text-base">{user?.email}</p>
-          <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-start">
-            <span className="badge badge-success flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <FaFileAlt className="text-xs sm:text-sm" /> Posts: {stats.posts}
-            </span>
-            <span className="badge badge-info flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <FaComments className="text-xs sm:text-sm" /> Comments: {stats.comments}
-            </span>
-            <span className="badge badge-warning flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <FaUsers className="text-xs sm:text-sm" /> Users: {stats.users}
-            </span>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-100 space-y-6">
+      {/* Header */}
+<div className="bg-white rounded-2xl p-6 text-black shadow-lg flex justify-between items-center">
+  <div className="flex items-center gap-5">
+    {/* User Avatar */}
+    <div className="relative w-20 h-20">
+      <img
+        src={user?.photoURL || "https://via.placeholder.com/80"}
+        alt={user?.displayName}
+        className="w-20 h-20 rounded-full border-4 border-indigo-500 object-cover shadow-md"
+      />
+      <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></span>
+    </div>
 
-     
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-white rounded-2xl p-4 sm:p-6">
-        <div className="bg-green-100 p-3 sm:p-4 rounded-xl shadow flex items-center gap-3 sm:gap-4 hover:shadow-lg transition cursor-pointer border-r-4 sm:border-r-8 border-green-500">
-          <FaFileAlt className="text-green-600 text-2xl sm:text-3xl" />
-          <div>
-            <p className="font-semibold text-gray-700 text-sm sm:text-base">Posts</p>
-            <p className="text-xl sm:text-2xl font-bold text-green-800">{stats.posts}</p>
-          </div>
-        </div>
+    <div>
+      <h1 className="text-3xl font-semibold drop-shadow-md">Admin Dashboard</h1>
+      <p className="text-gray-700 mt-1">Welcome back, {user?.displayName}</p>
+    </div>
+  </div>
 
-        <div className="bg-blue-100 p-3 sm:p-4 rounded-xl shadow flex items-center gap-3 sm:gap-4 hover:shadow-lg transition cursor-pointer border-r-4 sm:border-r-8 border-blue-500">
-          <FaComments className="text-blue-600 text-2xl sm:text-3xl" />
-          <div>
-            <p className="font-semibold text-gray-700 text-sm sm:text-base">Comments</p>
-            <p className="text-xl sm:text-2xl font-bold text-blue-800">{stats.comments}</p>
-          </div>
-        </div>
+  <div className="text-right bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
+    <p className="text-sm text-black">Total Revenue</p>
+    <p className="text-2xl font-bold">${totalRevenue.toLocaleString()}</p>
+  </div>
+</div>
 
-        <div className="bg-yellow-100 p-3 sm:p-4 rounded-xl shadow flex items-center gap-3 sm:gap-4 hover:shadow-lg transition cursor-pointer border-r-4 sm:border-r-8 border-yellow-500">
-          <FaUsers className="text-yellow-600 text-2xl sm:text-3xl" />
-          <div>
-            <p className="font-semibold text-gray-700 text-sm sm:text-base">Users</p>
-            <p className="text-xl sm:text-2xl font-bold text-yellow-800">{stats.users}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Pie + Bar Charts Dark Mode */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 bg-gray-900 shadow rounded-xl p-4 sm:p-6">
-        <div className="mb-6 lg:mb-0">
-          <h3 className="font-bold mb-4 text-white flex items-center justify-center gap-2 text-sm sm:text-base">
-            <FaChartPie /> Site Activity (Pie)
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
+
+      {/* Stats */}
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  {/* Total Users */}
+  <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-500 flex items-center justify-between">
+    <div>
+      <p className="text-gray-600">Total Users</p>
+      <h2 className="text-3xl font-bold">
+        {(stats.totalUsers || 0).toLocaleString()}
+      </h2>
+      <p className="text-sm text-gray-500">
+        Gold: {stats.goldenUsers || 0} • Bronze: {stats.bronzeUsers || 0}
+      </p>
+    </div>
+    <FaUsers className="text-blue-500 text-3xl" />
+  </div>
+
+  {/* Total Posts */}
+  <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500 flex items-center justify-between">
+    <div>
+      <p className="text-gray-600">Total Posts</p>
+      <h2 className="text-3xl font-bold">
+        {(stats.totalPosts || 0).toLocaleString()}
+      </h2>
+      <p className="text-sm text-gray-500">
+        {(stats.totalComments || 0).toLocaleString()} Comments
+      </p>
+    </div>
+    <FaFileAlt className="text-green-500 text-3xl" />
+  </div>
+
+  {/* Premium Members */}
+  <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-yellow-500 flex items-center justify-between">
+    <div>
+      <p className="text-gray-600">Premium Members</p>
+      <h2 className="text-3xl font-bold">
+        {((stats.goldenUsers || 0) + (stats.bronzeUsers || 0)).toLocaleString()}
+      </h2>
+    </div>
+    <FaCrown className="text-yellow-500 text-3xl" />
+  </div>
+
+  {/* Total Revenue */}
+  <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-purple-500 flex items-center justify-between">
+    <div>
+      <p className="text-gray-600">Total Revenue</p>
+      <h2 className="text-3xl font-bold">${totalRevenue.toLocaleString()}</h2>
+    </div>
+    <FaMoneyCheck className="text-purple-500 text-3xl" />
+  </div>
+</div>
+
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-2 rounded-2xl shadow-sm">
+          <h3 className="text-lg text-center">Membership Distribution</h3>
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={pieData}
+                data={membershipData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
-                label={{ fill: DARK_TEXT, fontSize: 12 }}
+                outerRadius={100}
+                label={({ name, percent }) =>
+                  `${name} (${(percent * 100).toFixed(1)}%)`
+                }
               >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {membershipData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: DARK_BG, color: DARK_TEXT, fontSize: 12 }} />
-              <Legend wrapperStyle={{ color: DARK_TEXT, fontSize: 12 }} />
+              <Tooltip formatter={(value) => [value, "Users"]} />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div>
-          <h3 className="font-bold mb-4 text-white flex items-center justify-center gap-2 text-sm sm:text-base">
-            <FaChartBar /> Site Activity (Bar)
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid stroke="#374151" />
-              <XAxis dataKey="name" stroke={DARK_TEXT} fontSize={12} />
-              <YAxis stroke={DARK_TEXT} fontSize={12} />
-              <Tooltip contentStyle={{ backgroundColor: DARK_BG, color: DARK_TEXT, fontSize: 12 }} />
-              <Legend wrapperStyle={{ color: DARK_TEXT, fontSize: 12 }} />
-              <Bar dataKey="value" fill="#60a5fa" />
-            </BarChart>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h3>Recent Payments</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(value) => [`$${value}`, "Revenue"]} />
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                 fill="#c7d2fe"  
+                 stroke="#4f46e5" 
+    
+                fillOpacity={0.3}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
+        
       </div>
+      {/* Activity & Actions Section */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Site Activity */}
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <FaChartLine className="text-indigo-600" />
+      Platform Activity
+    </h3>
+    <ResponsiveContainer width="100%" height={250}>
+      <BarChart data={activityData}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip formatter={(value) => [value.toLocaleString(), "Count"]} />
+        <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 my-6 sm:my-10 bg-white rounded-2xl p-4 sm:p-6">
-        <h3 className="font-bold text-lg sm:text-xl mb-2 flex items-center gap-2 justify-center">
-          <FaUserShield /> Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <NavLink
-            to="/dashboard/users"
-            className="card bg-blue-100 shadow-lg hover:bg-blue-200 transition cursor-pointer p-3 sm:p-4 rounded-xl flex items-center gap-3 sm:gap-4 border-r-4 sm:border-r-8 border-blue-500"
-          >
-            <FaUsers className="text-blue-600 text-2xl sm:text-3xl" />
-            <div className="text-center sm:text-left flex-1">
-              <h4 className="font-semibold text-gray-700 text-sm sm:text-base">Manage Users</h4>
-              <p className="text-gray-500 text-xs sm:text-sm">View and edit all users</p>
-            </div>
-          </NavLink>
+  {/* Quick Actions */}
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <FaUserShield className="text-indigo-600" />
+      Quick Actions
+    </h3>
+    <div className="grid grid-cols-2 gap-4">
+      {[
+        { to: "/dashboard/manage-users", icon: FaUsers, label: "Manage Users", color: "blue" },
+        { to: "/dashboard/posts", icon: FaFileAlt, label: "Manage Posts", color: "green" },
+       
+        { to: "/dashboard/announcement", icon: FaBullhorn, label: "Announcements", color: "orange" },
+        { to: "/dashboard/reports", icon: FaChartLine, label: "View Reports", color: "purple" },
+ 
+      ].map((action, index) => (
+        <NavLink
+          key={index}
+          to={action.to}
+          className={`p-8 rounded-xl  transition-all duration-200 hover:shadow-md flex flex-col items-center text-center bg-gray-50 hover:bg-gray-100`}
+        >
+          <action.icon className="text-indigo-600 text-2xl mb-2" />
+          <p className="font-medium text-gray-900 text-sm">{action.label}</p>
+        </NavLink>
+      ))}
+    </div>
+  </div>
+</div>
 
-          <NavLink
-            to="/dashboard/posts"
-            className="card bg-green-100 shadow-lg hover:bg-green-200 transition cursor-pointer p-3 sm:p-4 rounded-xl flex items-center gap-3 sm:gap-4 border-r-4 sm:border-r-8 border-green-500"
-          >
-            <FaFileAlt className="text-green-600 text-2xl sm:text-3xl" />
-            <div className="text-center sm:text-left flex-1">
-              <h4 className="font-semibold text-gray-700 text-sm sm:text-base">Manage Posts</h4>
-              <p className="text-gray-500 text-xs sm:text-sm">Review and moderate posts</p>
-            </div>
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/comments"
-            className="card bg-yellow-100 shadow-lg hover:bg-yellow-200 transition cursor-pointer p-3 sm:p-4 rounded-xl flex items-center gap-3 sm:gap-4 border-r-4 sm:border-r-8 border-yellow-500"
-          >
-            <FaComments className="text-yellow-600 text-2xl sm:text-3xl" />
-            <div className="text-center sm:text-left flex-1">
-              <h4 className="font-semibold text-gray-700 text-sm sm:text-base">Reported Comments</h4>
-              <p className="text-gray-500 text-xs sm:text-sm">Check flagged comments</p>
-            </div>
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/announcements"
-            className="card bg-orange-100 shadow-lg hover:bg-orange-200 transition cursor-pointer p-3 sm:p-4 rounded-xl flex items-center gap-3 sm:gap-4 border-r-4 sm:border-r-8 border-orange-500"
-          >
-            <FaBullhorn className="text-orange-600 text-2xl sm:text-3xl" />
-            <div className="text-center sm:text-left flex-1">
-              <h4 className="font-semibold text-gray-700 text-sm sm:text-base">Announcements</h4>
-              <p className="text-gray-500 text-xs sm:text-sm">View or create announcements</p>
-            </div>
-          </NavLink>
-        </div>
-      </div>
-
-      {/* Tag Management */}
-      <div className="bg-white shadow rounded-xl p-4 sm:p-6">
-        <h3 className="font-bold mb-4 flex items-center gap-2 text-sm sm:text-base">
-          <FaTags /> Manage Tags
-        </h3>
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <input
-            type="text"
-            className="input input-bordered w-full text-sm sm:text-base"
-            placeholder="Add new tag"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-          />
+{/* Bottom Section */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Tag Management */}
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <FaTags className="text-indigo-600" />
+        Manage Tags
+      </h3>
+      <span className="text-sm text-gray-500">
+        {(tags?.length || 0)} tags
+      </span>
+    </div>
+    <div className="flex gap-3 mb-4">
+      <input
+        type="text"
+        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+        placeholder="Add new tag..."
+        value={newTag}
+        onChange={(e) => setNewTag(e.target.value)}
+        onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
+      />
+      <button
+        className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50"
+        onClick={handleAddTag}
+        disabled={!newTag.trim()}
+      >
+        Add Tag
+      </button>
+    </div>
+    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+      {(tags || []).map((tag) => (
+        <span
+          key={tag._id}
+          className="bg-indigo-100 text-indigo-800 px-3 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-indigo-200 transition-colors"
+        >
+          <FaTags className="text-indigo-600 text-xs" />
+          {tag.name}
           <button
-            className="btn btn-primary text-sm sm:text-base whitespace-nowrap"
-            onClick={handleAddTag}
+            className="ml-1 text-red-500 hover:text-red-700 transition-colors"
+            onClick={() => handleRemoveTag(tag._id)}
+            title="Remove tag"
           >
-            Add
+            <FaTimes className="text-xs" />
           </button>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {tags.map((tag) => (
-            <span
-              key={tag._id}
-              className="badge badge-outline badge-primary flex items-center gap-1 text-xs sm:text-sm"
-            >
-              {tag.name}
-              <button
-                className="ml-1 text-red-500 hover:text-red-700"
-                onClick={() => handleRemoveTag(tag._id)}
-              >
-                <FaTimes className="text-xs" />
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
+        </span>
+      ))}
+    </div>
+  </div>
 
-      {/* Recent Announcements */}
-      <div className="bg-white shadow rounded-xl p-4 sm:p-6">
-        <h3 className="font-bold mb-4 flex justify-center items-center gap-2 text-sm sm:text-base">
-          <FaBullhorn /> Recent Announcements
-        </h3>
-        {recentAnnouncements.length > 0 ? (
-          <AnnouncementsLists announcements={recentAnnouncements} />
-        ) : (
-          <p className="text-gray-500 text-center">No announcements available.</p>
-        )}
+  {/* Recent Announcements */}
+  <div className="bg-white rounded-2xl shadow-sm p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <FaBullhorn className="text-indigo-600" />
+        Recent Announcements
+      </h3>
+      <NavLink
+        to="/dashboard/announcements"
+        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+      >
+        View All
+      </NavLink>
+    </div>
+    {recentAnnouncements?.length > 0 ? (
+      <AnnouncementsLists announcements={recentAnnouncements} />
+    ) : (
+      <div className="text-center py-8">
+        <FaBullhorn className="text-gray-300 text-4xl mx-auto mb-3" />
+        <p className="text-gray-500">No announcements yet</p>
+        <NavLink
+          to="/dashboard/announcements/create"
+          className="text-indigo-600 hover:text-indigo-700 text-sm font-medium mt-2 inline-block"
+        >
+          Create your first announcement
+        </NavLink>
       </div>
+    )}
+  </div>
+</div>
+
     </div>
   );
 };

@@ -175,9 +175,16 @@ const Announcement = () => {
 
   if (loading)
     return (
-      <p className="text-center text-gray-500 mt-6">
-        Loading announcements...
-      </p>
+  <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-indigo-200 rounded-full"></div>
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+        </div>
+        <p className="text-gray-600 mt-4 font-medium">
+        Loading announcements
+        </p>
+        <p className="text-gray-400 text-sm mt-2">Please wait a moment</p>
+      </div>
     );
 
   return (
@@ -192,7 +199,7 @@ const Announcement = () => {
         </div>
         {isAdmin && (
           <button
-            className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+            className="btn bg-indigo-500 text-white flex items-center gap-2 w-full sm:w-auto justify-center"
             onClick={() => document.getElementById("add_modal").showModal()}
           >
             <FaPlus /> Add Announcement

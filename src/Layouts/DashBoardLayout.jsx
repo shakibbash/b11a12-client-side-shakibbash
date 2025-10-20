@@ -23,7 +23,7 @@ import useUserRole from "../Hooks/useUserRole";
 
 const DashboardLayout = () => {
   const { user, logOut, } = useAuth();
-  const { isAdmin, isUser } = useUserRole(); 
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -82,13 +82,13 @@ const DashboardLayout = () => {
         <div className="flex items-center justify-center py-6 border-b border-indigo-600">
           <Logo />
         </div>
-        <nav className="mt-6 flex-1">
+        <nav className="mt-6 flex-1 ">
           {menuItems.map((item) =>
             item.link ? (
               <Link
                 key={item.key}
                 to={item.link}
-                className="flex items-center gap-3 py-3 px-6 hover:bg-indigo-600 transition-colors rounded-lg"
+                className="flex items-center gap-4 py-4 px-6 hover:bg-indigo-600 transition-colors rounded-lg"
               >
                 {item.icon} <span>{item.label}</span>
               </Link>
@@ -108,7 +108,7 @@ const DashboardLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between bg-gradient-to-r from-indigo-500 to-blue-400 text-white px-6 py-6 shadow-md relative">
+        <header className="flex items-center justify-between bg-indigo-500 text-white px-6 py-6 shadow-md relative">
           <div className="flex items-center gap-3">
             {/* Hamburger for mobile */}
             <button
@@ -181,7 +181,7 @@ const DashboardLayout = () => {
 
         {/* Content */}
         <main className="flex-1 overflow-auto p-6">
-          <div className="rounded-lg p-6 min-h-[80vh]">
+          <div className="rounded-lg  min-h-[80vh]">
             <Outlet />
           </div>
         </main>

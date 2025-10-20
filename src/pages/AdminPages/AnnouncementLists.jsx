@@ -3,7 +3,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useUserRole from "../../Hooks/useUserRole";
-import { toast } from "react-hot-toast";
+
 import { Link } from "react-router";
 
 const AnnouncementsLists = () => {
