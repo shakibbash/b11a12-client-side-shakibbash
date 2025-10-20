@@ -57,7 +57,7 @@ const Testimonials = () => {
             >
               {/* Quote Icon */}
               <div className="flex justify-center mb-4">
-                <FaQuoteLeft className="text-3xl text-indigo-600 opacity-20 animate-bounce" />
+                <FaQuoteLeft className="text-3xl text-indigo-400  animate-bounce" />
               </div>
 
           {/* User Avatar */}

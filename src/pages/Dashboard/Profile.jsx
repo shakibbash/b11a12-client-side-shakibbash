@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import {
@@ -13,6 +13,8 @@ import {
   FaCalendarAlt,
   FaClipboardList,
   FaComment,
+  FaTag,
+  FaArrowRight
 } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import useAuth from '../../Hooks/useAuth';
@@ -20,6 +22,7 @@ import useAxiosSecure from '../../Hooks/useAxiosSecure';
 import bronzeBadge from "../../../Public/assets/New Medal.json";
 import goldBadge from "../../../Public/assets/gold medal.json";
 import Lottie from 'lottie-react';
+
 const Profile = () => {
   const { user } = useAuth();
   const axios = useAxiosSecure();
@@ -29,8 +32,7 @@ const Profile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [uploading, setUploading] = useState({ profile: false, cover: false });
 
-  // Fetch user info
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     if (!user?.email) return;
     try {
       const res = await axios.get(`/users/${user.email}`);
@@ -39,14 +41,13 @@ const Profile = () => {
     } catch (err) {
       console.error('Failed to fetch user:', err);
     }
-  };
+  }, [axios, user?.email]);
 
   useEffect(() => {
     fetchUser();
-  }, [user?.email]);
+  }, [fetchUser]);
 
-  // Fetch user's posts
-  const { data: posts = [], isLoading, isError } = useQuery({
+  const { data: posts = [], isError } = useQuery({
     queryKey: ['userPosts', user?.email],
     queryFn: async () => {
       if (!user?.email) return [];
@@ -55,20 +56,16 @@ const Profile = () => {
     },
   });
 
-  // if (isLoading) return <p className="text-center py-4">Loading posts...</p>;
   if (isError) return <p className="text-center py-4 text-red-500">Failed to load posts.</p>;
 
-  // Sort and get only 3 most recent posts
   const recentPosts = posts
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3);
 
-  // Compute stats dynamically
   const totalPosts = posts.length;
   const totalUpvotes = posts.reduce((acc, p) => acc + (p.upVote || 0), 0);
   const totalDownvotes = posts.reduce((acc, p) => acc + (p.downVote || 0), 0);
 
-  // Upload profile or cover image
   const handleUpload = async (file, type) => {
     if (!file || !user?.email) return;
     setUploading((prev) => ({ ...prev, [type]: true }));
@@ -110,20 +107,27 @@ const Profile = () => {
     }
   };
 
-  if (!profileData) return <p className="text-center py-6 text-lg">Loading profile...</p>;
+  if (!profileData) return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        <p className="text-gray-600 mt-4">Loading profile...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="w-full h-screen bg-gray-50">
-      <div className="flex flex-col items-center">
+    <div className="min-h-screen ">
+      <div className="max-w-8xl bg-gray-100 ">
         {/* Cover Photo */}
-        <div className="relative w-full max-w-6xl">
+        <div className="relative rounded-2xl overflow-hidden shadow-sm mb-20">
           <img
             src={profileData.coverURL || 'https://via.placeholder.com/1200x300?text=Cover+Photo'}
             alt="Cover"
-            className="w-full h-72 object-cover rounded-b-xl shadow-md"
+            className="w-full h-64 object-cover"
           />
-          <label className="absolute top-4 right-4 cursor-pointer bg-white p-3 rounded-full shadow hover:bg-gray-100 transition">
-            <FaCamera className="text-xl text-gray-700" />
+          <label className="absolute top-4 right-4 cursor-pointer bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm hover:bg-white transition-colors">
+            <FaCamera className="text-gray-600" />
             <input
               type="file"
               accept="image/*"
@@ -133,16 +137,18 @@ const Profile = () => {
             />
           </label>
 
-          {/* Profile Picture */}
-          <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2">
-            <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-6 border-white overflow-hidden shadow-xl">
-              <img
-                src={profileData.photoURL || 'https://via.placeholder.com/200?text=Profile'}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-              <label className="absolute bottom-6 right-4 cursor-pointer bg-white p-2 rounded-full shadow hover:bg-gray-100">
-                <FaEdit className="text-gray-700 w-5 h-5" />
+          {/* Profile Picture - Left Aligned */}
+          <div className="absolute top-30 left-8 transform">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden shadow-lg">
+                <img
+                  src={profileData.photoURL || 'https://via.placeholder.com/200?text=Profile'}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <label className="absolute bottom-2 right-2 cursor-pointer bg-white p-2 rounded-full shadow-sm hover:bg-gray-100 transition-colors">
+                <FaCamera className="text-gray-600 w-4 h-4" />
                 <input
                   type="file"
                   accept="image/*"
@@ -155,168 +161,235 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Personal Info */}
-    {/* Personal Info */}
-<div className="mt-28 flex flex-col items-center gap-4 bg-white w-full max-w-6xl p-8 rounded-xl shadow-lg text-center relative">
-  <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full relative">
-    <div className="flex items-center relative ">
-      <h1 className="text-4xl font-bold">{profileData.name}</h1>
-
-      {/* Badge */}
-      {profileData.badge === 'bronze' ? (
-        <div className="w-40 h-40 absolute md:-right-26    ">
-          <Lottie
-            animationData={bronzeBadge}
-            loop
-            autoplay
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
-      ) :  (
-        <div className="w-25 h-25 absolute md:-right-26 -right-6   ">
-          <Lottie
-            animationData={goldBadge}
-            loop
-            autoplay
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
-        
-      )}
-<span className='ml-5 hidden md:block bg-amber-400 px-3 py-1 text-sm rounded-4xl'>badge</span>
-    </div>
-
-    <p className="text-gray-600 md:text-lg mt-2 md:mt-0">
-      <span className="animate-pulse">🟢</span> {profileData.email}
-    </p>
-  </div>
-
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 w-full">
-            <div className="bg-blue-50 border-l-[8px] border-blue-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
-              <div className="bg-blue-100 p-3 rounded-full mb-2">
-                <FaClipboardList className="text-blue-600 text-xl" />
+        {/* Profile Content */}
+        <div className="max-w-full">
+          {/* Header Section */}
+          <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+              <div className="flex items-start gap-6">
+                {/* Avatar Display - Left Side */}
+                <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden shadow-lg">
+                  <img
+                    src={profileData.photoURL || 'https://via.placeholder.com/200?text=Profile'}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{profileData.name}</h1>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>{profileData.email}</span>
+                  </div>
+                </div>
               </div>
-              <h1 className="text-lg font-semibold">Total Posts</h1>
-              <p className="text-lg">{totalPosts}</p>
-            </div>
-
-            <div className="bg-green-50  border-l-[8px] border-green-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
-              <div className="bg-green-100 p-3 rounded-full mb-2">
-                <FaArrowUp className="text-green-600 text-xl" />
+              
+              {/* Badge */}
+              <div className="flex items-center gap-3">
+                {profileData.badge === 'bronze' ? (
+                  <div className="w-20 h-20">
+                    <Lottie animationData={bronzeBadge} loop autoplay />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20">
+                    <Lottie animationData={goldBadge} loop autoplay />
+                  </div>
+                )}
+                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {profileData.badge || 'No Badge'}
+                </span>
               </div>
-              <h1 className="text-lg font-semibold">Total Upvotes</h1>
-              <p className="text-lg">{totalUpvotes}</p>
-            </div>
-
-            <div className="bg-red-50 border-l-[8px] border-red-500 rounded-xl shadow p-4 flex flex-col items-center gap-2 hover:shadow-lg transition">
-              <div className="bg-red-100 p-3 rounded-full mb-2">
-                <FaArrowDown className="text-red-600 text-xl" />
-              </div>
-              <h1 className="text-lg font-semibold">Total Downvotes</h1>
-              <p className="text-lg">{totalDownvotes}</p>
             </div>
           </div>
 
-          {/* About Me */}
-          <div className="mt-8 bg-white rounded-xl shadow-lg p-6 w-full max-w-6xl text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">About Me</h2>
+          {/* Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+    <div className="flex items-center gap-4">
+      <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center">
+        <FaClipboardList className="text-blue-600 text-xl" />
+      </div>
+      <div className="text-left">
+        <h3 className="text-lg font-semibold text-gray-900">Total Posts</h3>
+        <p className="text-2xl font-bold text-gray-900">{totalPosts}</p>
+      </div>
+    </div>
+  </div>
+
+  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+    <div className="flex items-center gap-4">
+      <div className="bg-green-50 w-12 h-12 rounded-lg flex items-center justify-center">
+        <FaArrowUp className="text-green-600 text-xl" />
+      </div>
+      <div className="text-left">
+        <h3 className="text-lg font-semibold text-gray-900">Total Upvotes</h3>
+        <p className="text-2xl font-bold text-gray-900">{totalUpvotes}</p>
+      </div>
+    </div>
+  </div>
+
+  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+    <div className="flex items-center gap-4">
+      <div className="bg-red-50 w-12 h-12 rounded-lg flex items-center justify-center">
+        <FaArrowDown className="text-red-600 text-xl" />
+      </div>
+      <div className="text-left">
+        <h3 className="text-lg font-semibold text-gray-900">Total Downvotes</h3>
+        <p className="text-2xl font-bold text-gray-900">{totalDownvotes}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+          {/* About Me Section */}
+          <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">About Me</h2>
               <button
                 onClick={() => setIsEditingBio((prev) => !prev)}
-                className="text-gray-500 hover:text-blue-600 transition"
+                className="text-gray-500 hover:text-indigo-600 transition-colors p-2"
               >
-                <FaEdit />
+                <FaEdit className="w-5 h-5" />
               </button>
             </div>
+            
             {isEditingBio ? (
-              <div className="flex flex-col items-center gap-3">
+              <div className="space-y-4">
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={4}
-                  className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Tell us about yourself..."
                 />
-                <button
-                  onClick={handleSaveBio}
-                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-                >
-                  Save
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveBio}
+                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  >
+                    Save Bio
+                  </button>
+                  <button
+                    onClick={() => setIsEditingBio(false)}
+                    className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="p-3 bg-gray-50">
-                <p className="text-gray-700 text-lg">{bio || 'No bio provided yet.'}</p>
+              <div className="bg-gray-100 rounded-lg p-6">
+                <p className="text-gray-700 leading-relaxed">
+                  {bio || 'No bio provided yet. Click the edit button to add something about yourself.'}
+                </p>
               </div>
             )}
           </div>
 
-          {/* Recent Posts */}
-          <h1 className="mt-8 text-3xl font-bold text-gray-800">My Recent Posts</h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {recentPosts.map((post) => (
-              <div
-                key={post._id}
-                className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between"
-              >
-                {/* Author Info */}
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src={profileData.photoURL || 'https://via.placeholder.com/40?text=User'}
-                    alt={profileData.name}
-                    className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400 hover:scale-110 transition"
-                  />
-                  <span className="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer">
-                    {profileData.name}
-                  </span>
-                </div>
-
-                {/* Post Title */}
-                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 hover:underline cursor-pointer mb-3">
-                  {post.title || 'Untitled'}
-                </h3>
-
-                {/* Post Content */}
-                <p className="text-gray-600 text-sm mb-4">
-                  {(post.content || '').slice(0, 120)}
-                  {(post.content || '').length > 120 ? '...' : ''}
-                </p>
-
-                {/* Tags */}
-                {post.tag && (
-                  <span className="inline-block bg-gradient-to-r from-purple-200 to-pink-200 text-purple-800 px-3 py-1 rounded-full text-xs font-medium mb-4">
-                    {post.tag}
-                  </span>
-                )}
-
-                {/* Post Stats */}
-                <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 hover:text-green-500 transition">
-                      <FaArrowUp /> {post.upVote || 0}
-                    </div>
-                    <div className="flex items-center gap-1 hover:text-red-500 transition">
-                      <FaArrowDown /> {post.downVote || 0}
-                    </div>
-                    <div className="flex items-center gap-1 hover:text-blue-500 transition">
-                      <FaComment /> {post.commentCount || 0}
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-400">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {/* View Post Button */}
-                <Link
-                  to={`/post/${post._id}`}
-                  className="mt-auto text-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold"
-                >
-                  View Post
-                </Link>
+          {/* Recent Posts Section - Using Your Post Grid Layout */}
+          <div className="bg-gray-100 rounded-2xl shadow-sm ">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Posts</h2>
+            
+            {recentPosts.length === 0 ? (
+              <div className="text-center py-8">
+                <FaClipboardList className="text-gray-300 text-4xl mx-auto mb-3" />
+                <p className="text-gray-500">No posts yet. Start sharing your thoughts!</p>
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {recentPosts.map((post) => (
+                  <article
+                    key={post._id}
+                    className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden flex flex-col"
+                  >
+                    {/* Post Image */}
+                    {post.image && (
+                      <div className="relative h-48 w-full overflow-hidden">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors"></div>
+                      </div>
+                    )}
+
+                    {/* Card Content */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      {/* Author Header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="relative">
+                          <img
+                            src={profileData.photoURL || "/default-avatar.png"}
+                            alt="Author"
+                            className="w-10 h-10 rounded-full border-2 border-indigo-200 object-cover group-hover:border-indigo-400 transition-colors"
+                          />
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full border-2 border-white"></div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {profileData.name || "Anonymous"}
+                          </h3>
+                          <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <FaClock className="text-indigo-500" />
+                            {new Date(post.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h2 className="font-bold text-lg text-gray-900 mb-3 leading-tight group-hover:text-indigo-500 transition-colors line-clamp-2">
+                        {post.title}
+                      </h2>
+
+                      {/* Description */}
+                      {post.content && (
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                          {post.content}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      {post.tag && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full border bg-indigo-50 text-indigo-600 border-indigo-200">
+                            <FaTag className="w-3 h-3" />
+                            {post.tag}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Stats and Read More */}
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-auto">
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 text-indigo-600">
+                            <FaArrowUp className="w-3 h-3" />
+                            {post.upVote || 0}
+                          </span>
+                          <span className="flex items-center gap-1 px-1 py-1 rounded-lg bg-indigo-50 text-indigo-600">
+                            <FaArrowDown className="w-3 h-3" />
+                            {post.downVote || 0}
+                          </span>
+                        </div>
+
+                        <Link
+                          to={`/post/${post._id}`}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 px-4 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                        >
+                          Read More
+                          <FaArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

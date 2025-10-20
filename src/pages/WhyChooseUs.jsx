@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Link } from "react-router";
 
 const features = [
   {
@@ -161,12 +162,12 @@ const WhyChooseUs = () => {
               data-aos="fade-up"
               data-aos-delay="200"
             >
+             <Link to="add-post">
               <button className="bg-white text-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl">
                 Get Started Free
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-indigo-600 transition-colors">
-                Take a Tour
-              </button>
+              </Link>
+             
             </div>
           </div>
         </div>
