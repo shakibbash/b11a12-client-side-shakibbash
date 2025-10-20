@@ -1,64 +1,57 @@
 import React, { useEffect, useState } from "react";
-import { FiAward, FiLock } from "react-icons/fi";
-import { Player } from "@lottiefiles/react-lottie-player";
- 
 import { FaCheckCircle, FaCrown, FaMedal, FaStar, FaArrowRight, FaInfoCircle, FaCreditCard } from "react-icons/fa";
 import Lottie from "lottie-react";
 import goldBadge from "../../../Public/assets/gold medal.json";
 import bronzeBadge from "../../../Public/assets/New Medal.json";
-import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation";
+import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation.json";
 import Marquee from "react-fast-marquee";
 import { useNavigate } from "react-router";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
 import Loader from "../../Components/Loader";
-// Plans
+
 const plans = [
   {
     name: "Bronze",
     price: "$0/mo",
     badge: bronzeBadge,
     popular: false,
-    color: "amber-600",
-    icon: <FaMedal />,
+    color: "amber",
+    icon: <FaMedal className="w-4 h-4" />,
     features: ["5 posts per day", "Basic community access", "Profile customization", "Access to free categories"],
     cta: "Start Basic",
   },
+ 
   {
     name: "Gold",
     price: "$30/mo",
     badge: goldBadge,
     popular: true,
-    color: "yellow-400",
-    icon: <FaCrown />,
+    color: "yellow",
+    icon: <FaCrown className="w-4 h-4" />,
     features: ["Everything in Silver", "Gold VIP badge", "Early access to new features", "Priority support", "Exclusive events & webinars", "Host polls & Q&As", "Leaderboard spotlight"],
     cta: "Upgrade to Gold",
   },
-  {
+   {
     name: "Silver",
     price: "$15/mo",
     badge: silverBadge,
     popular: false,
-    color: "gray-400",
-    icon: <FaStar />,
+    color: "gray",
+    icon: <FaStar className="w-4 h-4" />,
     features: ["Unlimited posts & comments", "Ad-free browsing", "Silver badge next to username", "Upload larger files/images"],
     cta: "Go Silver",
   },
 ];
 
-const borderClasses = {
-  Gold: "border-yellow-400 ring-yellow-300/60",
-  Silver: "border-gray-400 ring-gray-300/60",
-  Bronze: "border-amber-600 ring-amber-500/60",
-};
-
 const Membership = () => {
-   const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [userData, setUserData] = useState(null);  
-const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
+  const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
-    useEffect(() => {
+
+  useEffect(() => {
     if (!user?.email) return;
     const fetchUser = async () => {
       try {
@@ -72,243 +65,260 @@ const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
   }, [user?.email, axiosSecure]);
 
   if (loading || !userData) return <Loader />;
- 
 
   const handleProceedToPayment = () => {
-    if (!selected) return alert("Please select a plan first.");
-    // Replace with your Stripe payment route
-   
-  // pass selected plan to payments route
-  navigate("/payments");
+    if (!selected) return;
+    navigate("/payments", { state: { plan: selected } });
   };
+
+  const isCurrentPlan = (planName) => userData.membership === planName;
+
   return (
-    <div className="mt-5">
-      {/* Hero Banner */}
-      <div className="relative w-full h-[600px] md:h-[500px] rounded-xl shadow-2xl overflow-hidden pt-60 md:p-90">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 z-0"></div>
-        {Array.from({ length: 15 }).map((_, i) => (
-          <div key={i} className="absolute text-white opacity-20 animate-pulse"
-            style={{ fontSize: `${Math.random() * 20 + 10}px`, top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, animationDuration: `${Math.random() * 5 + 3}s` }}>
-            {["⭐", "✨", "🌟"][Math.floor(Math.random() * 5)]}
-          </div>
-        ))}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 z-10">
-          <Player autoplay loop src={goldBadge} style={{ height: "220px", width: "220px" }} />
-          <span className="mt-2 text-yellow-300 text-3xl font-bold animate-bounce">Unlock Your Gold Badge!</span>
-          <div className="flex gap-6 mb-4 text-white text-2xl mt-4">
-                       <FaCreditCard />
-            <FiAward title="Unlimited Posts" />
-            <FiLock title="Exclusive Content" />
+    <div className="min-h-screen bg-white mt-10">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white py-16">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8 text-center">
+          <div className="max-w-3xl mx-auto">
+            <div className="w-32 h-32 mx-auto mb-6">
+              <Lottie animationData={goldBadge} loop autoplay />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Upgrade Your <span className="text-yellow-300">ForumX</span> Experience
+            </h1>
+            <p className="text-xl text-indigo-100 mb-8 leading-relaxed">
+              Unlock premium features, earn exclusive badges, and enjoy unlimited access to our thriving community.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
          
-          </div>
-          <h1 className="text-white text-4xl md:text-5xl font-bold mb-4">
-            Become a <span className="text-yellow-300">Forum</span> Member
-          </h1>
-          <h3 className="text-white text-lg md:text-2xl mb-6 max-w-xl">
-            Enjoy exclusive features, unlimited posts, community perks, and stand out with your gold badge.
-          </h3>
-          <div className="flex gap-4">
-            <button className="btn btn-warning btn-lg">Join Now</button>
-            <button className="btn btn-outline btn-white btn-lg">Learn More</button>
+               <a href="#plan" className=" bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"> View Plans</a>
+       
+              
+   
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Pricing Cards */}
-     {/* Pricing Section */}
-      <section className="py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 text-gray-900">
-        <div className="max-w-6xl mx-auto px-6">
+      {/* Pricing Section */}
+      <section id="plan" className="py-16 bg-gray-50">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-2">
-        <FaCreditCard /> Choose Your Plan
-      </h1>
-      <p className="text-gray-600">
-        Unlock premium features and get recognized with exclusive badges 🚀
-      </p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+            <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Select the perfect plan to unlock premium features and enhance your community experience
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-             {plans.map((plan, idx) => {
-              const isCurrentPlan = userData.membership && plan.name === "Gold"; 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {plans.map((plan, index) => {
+              const currentPlan = isCurrentPlan(plan.name);
               return (
                 <div
-                  key={idx}
-                  onClick={() => !isCurrentPlan && setSelected(plan.name)}
-                  className={`relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 border-3 cursor-pointer transform transition hover:scale-105
-                    ${selected === plan.name ? borderClasses[plan.name] : "border-transparent"}
-                    ${plan.popular ? "scale-105 shadow-2xl" : ""}
-                    ${isCurrentPlan ? " cursor-not-allowed" : ""}
-                  `}
+                  key={index}
+                  className={`bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border-2 ${
+                    selected === plan.name 
+                      ? `border-${plan.color}-500 ring-2 ring-${plan.color}-200` 
+                      : 'border-gray-200'
+                  } ${plan.popular ? 'relative ring-2 ring-yellow-200' : ''}`}
                 >
-                  {/* Badge */}
-                  <div className="mb-4 flex justify-center">
-                    <Lottie animationData={plan.badge} loop autoplay style={{ width: 300, height: 200 }} />
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-yellow-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Badge Animation */}
+                  <div className="w-40 h-40 mx-auto mb-6">
+                    <Lottie animationData={plan.badge} loop autoplay />
                   </div>
 
-                  {/* Title & Price */}
-                  <h2 className="text-2xl font-bold text-center">{plan.name}</h2>
-                  <p className="text-indigo-600 text-3xl font-bold mt-2 text-center">{plan.price}</p>
+                  {/* Plan Header */}
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-3xl font-bold text-indigo-600">{plan.price}</p>
+                  </div>
 
-                  {/* Features */}
-                  <ul className="mt-6 space-y-3">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-gray-700">
-                        <FaCheckCircle className="text-green-500" />
-                        <span>{feature}</span>
+                  {/* Features List */}
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <FaCheckCircle className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600 text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  {/* Buttons */}
-                  <div className="mt-8 flex flex-col gap-3">
-                    <button
-                      disabled={isCurrentPlan}
-                      className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold transition shadow-md ${
-                        isCurrentPlan
-                          ? "bg-gray-400 text-white cursor-not-allowed"
-                          : plan.name === "Gold"
-                          ? "bg-yellow-400 hover:bg-yellow-500 text-black"
-                          : plan.name === "Silver"
-                          ? "bg-gray-400 hover:bg-gray-500 text-white"
-                          : "bg-amber-600 hover:bg-amber-700 text-white"
-                      }`}
-                    >
-                      {plan.icon} {isCurrentPlan ? "Already a Member" : plan.cta} <FaArrowRight />
-                    </button>
-                  </div>
-
-                  {/* Popular Tag */}
-                  {plan.popular && (
-                    <span className="absolute top-4 left-4 text-xs bg-indigo-600 text-white px-2 py-1 rounded-full">
-                      Most Popular
-                    </span>
-                  )}
+                  {/* Action Button */}
+                  <button
+                    onClick={() => !currentPlan && setSelected(plan.name)}
+                    disabled={currentPlan}
+                    className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                      currentPlan
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : selected === plan.name
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {plan.icon}
+                    {currentPlan ? 'Current Plan' : plan.cta}
+                  </button>
                 </div>
               );
             })}
           </div>
         </div>
       </section>
-        {/* Selected Plan */}
-      {selected && !userData.membership && (
-        <section className="py-12 bg-white/90 text-gray-900 text-center">
-          <h2 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
-            <FaCreditCard /> You Selected: {selected}
-          </h2>
-          <button
-            onClick={handleProceedToPayment}
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg flex items-center justify-center gap-2 mx-auto"
-          >
-            Proceed to Payment <FaArrowRight />
-          </button>
+
+      {/* Selected Plan CTA */}
+      {selected && !isCurrentPlan(selected) && (
+        <section className="py-12 bg-white border-t border-gray-200">
+          <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+              <FaCreditCard className="text-indigo-600" />
+              Selected: {selected} Plan
+            </h3>
+            <button
+              onClick={handleProceedToPayment}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto"
+            >
+              Proceed to Payment
+              <FaArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </section>
       )}
 
-      {/* Animated Comparison Table */}
-      <section className="px-6 max-w-6xl mx-auto my-15">
-        <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
-    <FaStar /> Compare Plans
-  </h2>
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full text-center rounded-2xl">
-            <thead>
-              <tr>
-                <th>Feature</th>
-                {plans.map((plan) => <th key={plan.name}>{plan.name}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Unlimited posts & comments", false, true, true],
-                ["Ad-free browsing", false, true, true],
-                ["VIP badge", false, true, true],
-                ["Access to exclusive events", false, true, false],
-              ].map((row, idx) => (
-                <tr key={idx}>
-                  <td>{row[0]}</td>
-                  {row.slice(1).map((val, i) => (
-                    <td key={i} className="text-center">
-                      {val ? <FaCheckCircle className="text-green-500 mx-auto" /> : <FaInfoCircle className="text-red-500 mx-auto" />}
-                    </td>
+      {/* Comparison Table */}
+      <section className="py-16 bg-white">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Plan Comparison</h2>
+            <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left font-semibold text-gray-900">Features</th>
+                  {plans.map((plan) => (
+                    <th key={plan.name} className="px-6 py-4 text-center font-semibold text-gray-900">
+                      {plan.name}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {[
+                  ["Unlimited posts & comments", false, true, true],
+                  ["Ad-free browsing", false, true, true],
+                  ["VIP badge display", false, true, true],
+                  ["Priority support", false,  true,false],
+                  ["Exclusive events", false,  true,false],
+                  ["File uploads", "Basic","Unlimited", "Enhanced", ],
+                ].map(([feature, ...values], index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-900">{feature}</td>
+                    {values.map((value, idx) => (
+                      <td key={idx} className="px-6 py-4 text-center">
+                        {typeof value === 'boolean' ? (
+                          value ? (
+                            <FaCheckCircle className="w-5 h-5 text-indigo-500 mx-auto" />
+                          ) : (
+                            <FaInfoCircle className="w-4 h-4 text-gray-400 mx-auto" />
+                          )
+                        ) : (
+                          <span className="text-gray-600 font-medium">{value}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      {/* Feature Highlights */}
-      <section className="py-16 bg-blue-50">
-         <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
-    <FaCrown /> Premium Features
-  </h2>
+      {/* Features Highlight */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Benefits</h2>
+            <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 ">
-          {[
-            { icon: <FaCrown />, title: "VIP Badge", desc: "Stand out with a premium badge" },
-            { icon: <FaStar />, title: "Ad-Free", desc: "Enjoy a smooth browsing experience" },
-            { icon: <FaMedal />, title: "Exclusive Events", desc: "Access webinars & polls" },
-          ].map((f, i) => (
-            <div key={i} className="card  bg-white border-b-[6px] border-amber-300 shadow-lg p-6 text-center hover:scale-105 transition">
-              <div className="text-4xl mb-4 text-yellow-400 mx-auto bg-blue-50 rounded-full p-2">{f.icon}</div>
-              <h3 className="font-bold text-xl mb-2">{f.title}</h3>
-              <p className="text-gray-700">{f.desc}</p>
-            </div>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: <FaCrown className="w-8 h-8" />, title: "Exclusive Badges", desc: "Stand out with premium badges that showcase your membership level" },
+              { icon: <FaStar className="w-8 h-8" />, title: "Ad-Free Experience", desc: "Enjoy seamless browsing without any interruptions" },
+              { icon: <FaMedal className="w-8 h-8" />, title: "VIP Events", desc: "Access exclusive webinars, polls, and community events" },
+            ].map((feature, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <div className="text-indigo-600">
+                    {feature.icon}
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-    <section className="py-16 bg-white">
-      <h2 className="text-3xl font-bold text-center mb-18">
-        Supported Payment Methods
-      </h2>
+      {/* Payment Methods */}
+      <section className="py-16 bg-white">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Secure Payment Methods</h2>
+            <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+          </div>
 
-      <Marquee gradient={false} speed={50} pauseOnHover={true}>
-        {/* Stripe */}
-        <img
-          src="https://i.ibb.co.com/YFhtM4cX/images-3.png"
-          alt="Stripe"
-          className="h-16 mx-6"
-        />
-        {/* Visa */}
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
-          alt="Visa"
-          className="h-10 mx-6"
-        />
-        {/* Mastercard */}
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-          alt="Mastercard"
-          className="h-16 mx-6"
-        />
-        {/* American Express */}
-        <img
-          src="https://i.ibb.co.com/yBcLLGsh/images-4.png"
-          alt="Amex"
-          className="h-16 mx-6"
-        />
-      
-      </Marquee>
-    </section>
+          <Marquee gradient={false} speed={40} pauseOnHover={true}>
+            {[
+              "https://i.ibb.co.com/YFhtM4cX/images-3.png",
+              "https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png",
+              "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
+              "https://i.ibb.co.com/yBcLLGsh/images-4.png",
+            ].map((logo, index) => (
+              <img
+                key={index}
+                src={logo}
+                alt="Payment method"
+                className="h-12 mx-8 opacity-70 hover:opacity-100 transition-opacity"
+              />
+            ))}
+          </Marquee>
+        </div>
+      </section>
 
-      {/* FAQ Accordion */}
-      <section className="py-16 bg-gray-100">
-         <h2 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
-    <FaInfoCircle /> Frequently Asked Questions
-  </h2>
-        <div className="max-w-3xl mx-auto  px-6">
-          {[
-            { q: "Can I upgrade or downgrade anytime?", a: "Yes, you can change your plan anytime with no hassle." },
-            { q: "Do you offer refunds?", a: "Refunds are available within the first 7 days of subscription." },
-            { q: "Is payment secure?", a: "All payments are encrypted and secured through Stripe/PayPal." },
-          ].map((f, i) => (
-            <div key={i} tabIndex={0} className="collapse collapse-arrow border border-base-300 bg-white rounded-box">
-              <div className="collapse-title text-lg font-medium">{f.q}</div>
-              <div className="collapse-content"><p>{f.a}</p></div>
-            </div>
-          ))}
+      {/* FAQ Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-8xl mx-10 px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { q: "Can I upgrade or downgrade my plan anytime?", a: "Yes, you can change your plan at any time. Changes take effect immediately." },
+              { q: "Do you offer refunds?", a: "We offer a 7-day money-back guarantee for all paid plans. No questions asked." },
+              { q: "Is my payment information secure?", a: "Yes, all payments are processed through secure, encrypted payment gateways." },
+              { q: "Can I cancel my subscription?", a: "Yes, you can cancel anytime from your account settings. No cancellation fees." },
+            ].map((faq, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 className="font-semibold text-gray-900 mb-3">{faq.q}</h3>
+                <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
@@ -316,7 +326,3 @@ const [selected, setSelected] = useState(userData?.membership ? null : "Gold");
 };
 
 export default Membership;
-
-
-
-

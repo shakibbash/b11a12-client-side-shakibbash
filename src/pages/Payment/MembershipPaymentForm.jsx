@@ -6,8 +6,8 @@ import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
 import Lottie from "lottie-react";
 import goldBadge from "../../../Public/assets/gold medal.json";
-import { FaLock, FaCheckCircle } from "react-icons/fa";
-import { SiReact, SiStripe } from "react-icons/si";
+import { FaLock, FaCheckCircle, FaArrowLeft, FaShieldAlt } from "react-icons/fa";
+import { SiStripe } from "react-icons/si";
 import { AiFillCreditCard } from "react-icons/ai";
 import Loader from "../../Components/Loader";
 import confetti from "canvas-confetti";
@@ -20,6 +20,7 @@ const MembershipPaymentForm = () => {
   const navigate = useNavigate();
 
   const [error, setError] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const membershipAmount = 30;
   const amountInCents = membershipAmount * 100;
 
@@ -31,158 +32,270 @@ const MembershipPaymentForm = () => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
+    setIsProcessing(true);
     const card = elements.getElement(CardElement);
     if (!card) return;
 
-    const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+    const { error: pmError } = await stripe.createPaymentMethod({
       type: "card",
       card,
     });
 
     if (pmError) {
       setError(pmError.message);
+      setIsProcessing(false);
       return;
     }
     setError("");
 
-    const res = await axiosSecure.post("/create-membership-intent", {
-      amountInCents,
-      membershipType: "gold",
-      userId: user.uid,
-    });
+    try {
+      const res = await axiosSecure.post("/create-membership-intent", {
+        amountInCents,
+        membershipType: "gold",
+        userId: user.uid,
+      });
 
-    const clientSecret = res.data.clientSecret;
+      const clientSecret = res.data.clientSecret;
 
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card,
-        billing_details: {
-          name: user.displayName,
-          email: user.email,
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card,
+          billing_details: {
+            name: user.displayName,
+            email: user.email,
+          },
         },
-      },
-    });
+      });
 
-    if (result.error) {
-      setError(result.error.message);
-    } else {
-      setError("");
-      if (result.paymentIntent.status === "succeeded") {
-        const transactionId = result.paymentIntent.id;
+      if (result.error) {
+        setError(result.error.message);
+      } else {
+        setError("");
+        if (result.paymentIntent.status === "succeeded") {
+          const transactionId = result.paymentIntent.id;
 
-        const paymentData = {
-          userId: user.uid,
-          email: user.email,
-          amount: membershipAmount,
-          transactionId,
-          paymentMethod: result.paymentIntent.payment_method_types,
-          membershipType: "gold",
-        };
+          const paymentData = {
+            userId: user.uid,
+            email: user.email,
+            amount: membershipAmount,
+            transactionId,
+            paymentMethod: result.paymentIntent.payment_method_types,
+            membershipType: "gold",
+          };
 
-        const paymentRes = await axiosSecure.post("/membership-payments", paymentData);
+          const paymentRes = await axiosSecure.post("/membership-payments", paymentData);
 
-        if (paymentRes.data.success) {
-       
+          if (paymentRes.data.success) {
+            confetti({
+              particleCount: 200,
+              spread: 70,
+              origin: { y: 0.6 },
+            });
 
-          // 🎉 Confetti effect
-          confetti({
-            particleCount: 200,
-            spread: 70,
-            origin: { y: 0.6 },
-          });
+            await Swal.fire({
+              icon: "success",
+              title: "Welcome to Gold Membership!",
+              html: `<strong>Your Gold Badge has been activated! 🎖️</strong><br/><br/>
+                     <div class="text-sm text-gray-600">
+                       Transaction ID: <code class="bg-gray-100 px-2 py-1 rounded">${transactionId}</code>
+                     </div>`,
+              confirmButtonText: "Go to Dashboard",
+              confirmButtonColor: "#4f46e5",
+              backdrop: "rgba(255, 215, 0, 0.2)",
+            });
 
-          // 🎉 SweetAlert confirmation
-          await Swal.fire({
-            icon: "success",
-            title: "Membership Activated!",
-            html: `<strong>Gold Badge Granted 🎖️</strong><br/><br/>Transaction ID: <code>${transactionId}</code>`,
-            confirmButtonText: "Go to Dashboard",
-            backdrop: `
-                rgba(255, 215, 0, 0.4)
-           
-            
-            `,
-          });
-
-          navigate("/dashboard/profile");
+            navigate("/dashboard/profile");
+          }
         }
       }
+    } catch {
+      // Error intentionally not inspected here; generic message shown to the user
+      setError("Payment processing failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
+  const handleReturn = () => {
+    navigate("/membership");
+  };
+
   return (
-    <div className="max-w-5xl mx-auto w-full p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col md:flex-row bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-200"
-      >
-        {/* Left Section: Membership Info & Badge */}
-        <div className="bg-yellow-50 md:w-1/3 p-6 flex flex-col items-center justify-center space-y-4">
-          <Lottie animationData={goldBadge} loop={true} className="w-36 h-36" />
-          <h2 className="font-bold text-2xl text-yellow-800 flex items-center gap-2">
-            Gold Membership 
-          </h2>
-          <p className="text-gray-700 text-center">
-            Unlock premium features, exclusive deals, and priority support with Gold Membership.
-          </p>
-          <div className="bg-white p-3 rounded-lg shadow-inner w-full text-left space-y-2">
-            <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
-              Membership Details
-            </h3>
-            <ul className="text-gray-600 text-sm space-y-1 list-disc list-inside">
-              <li>Price: <strong>$30</strong></li>
-              <li>Duration: <strong>1 Year</strong></li>
-              <li>Exclusive Badge: <strong>Gold 🎖️</strong></li>
-              <li>Priority Support Access</li>
-              <li>Access to Premium Features</li>
-            </ul>
+    <div className="min-h-screen  py-8">
+      <div className="max-w-8xl mx-10   ">
+        {/* Header with Return Button */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={handleReturn}
+            className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+          >
+            <FaArrowLeft className="w-4 h-4" />
+            Back to Plans
+          </button>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900">Complete Payment</h1>
+              <div
+            className="w-24 h-1 bg-indigo-600 mx-auto mb-2 mt-3"
+         
+          ></div>
+            <p className="text-gray-600">Secure checkout for Gold Membership</p>
           </div>
+          <div className="w-20"></div> {/* Spacer for balance */}
         </div>
 
-        {/* Right Section: Payment Form */}
-        <div className="md:w-2/3 p-6 flex flex-col justify-center gap-4">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-            Complete Your Payment <AiFillCreditCard className="text-gray-600" />
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Enter your card details below to activate your Gold Membership.
-          </p>
+        <div className="bg-gray-50 rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="flex flex-col md:flex-row">
+            {/* Left Section: Membership Info */}
+            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 md:w-2/5 p-8 border-r border-gray-200">
+              <div className="text-center mb-6">
+                <div className="w-32 h-32 mx-auto mb-4">
+                  <Lottie animationData={goldBadge} loop={true} />
+                </div>
+                <h2 className="text-2xl font-bold text-amber-800 mb-2">Gold Membership</h2>
+                <div className="text-3xl font-bold text-amber-600">${membershipAmount}</div>
+                <p className="text-amber-700 text-sm mt-1">per year</p>
+              </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg shadow-inner mb-4 flex flex-col gap-2">
-            <p><strong>Name:</strong> {user?.displayName || "Loading..."}</p> 
-            <p><strong>Email:</strong> {user?.email || "Loading..."}</p>      
-          </div>
+              <div className="bg-white/80 rounded-lg p-4 border border-amber-200">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <FaCheckCircle className="text-green-500" />
+                  Membership Benefits
+                </h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    Exclusive Gold Badge
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    Unlimited posts & comments
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    Ad-free browsing experience
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    Priority customer support
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    Access to exclusive events
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-          <div className="p-4 border rounded-lg bg-gray-50 shadow-inner mb-2">
-            <CardElement options={{
-              style: {
-                base: { fontSize: "16px", color: "#000", "::placeholder": { color: "#999" } },
-                invalid: { color: "#e53e3e" }
-              }
-            }} />
-            <div className="flex gap-2 mt-2">
-              <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" className="w-10 h-6"/>
-              <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="MasterCard" className="w-10 h-6"/>
-              <img src="https://img.icons8.com/color/48/000000/amex.png" alt="Amex" className="w-10 h-6"/>
+            {/* Right Section: Payment Form */}
+            <div className="md:w-3/5 p-8">
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <AiFillCreditCard className="text-indigo-600" />
+                  Payment Information
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Enter your card details to complete the purchase
+                </p>
+              </div>
+
+              {/* User Info */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500 font-medium">Name</p>
+                    <p className="text-gray-900">{user?.displayName || "Not provided"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 font-medium">Email</p>
+                    <p className="text-gray-900">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Element */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Card Details
+                </label>
+                <div className="border border-gray-300 rounded-lg p-3 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#374151",
+                          "::placeholder": {
+                            color: "#9CA3AF",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2 mt-3">
+                  {["visa", "mastercard", "amex"].map((type) => (
+                    <div key={type} className="w-10 h-6 bg-gray-100 rounded flex items-center justify-center">
+                      <img
+                        src={`https://img.icons8.com/color/48/000000/${type}.png`}
+                        alt={type}
+                        className="w-6 h-4 object-contain"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Security Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <FaShieldAlt className="text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-blue-800 text-sm font-medium">Secure Payment</p>
+                    <p className="text-blue-700 text-xs">
+                      Your payment information is encrypted and processed securely by Stripe
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                type="submit"
+                disabled={!stripe || isProcessing}
+                onClick={handleSubmit}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <SiStripe className="w-5 h-5" />
+                    Pay ${membershipAmount}
+                  </>
+                )}
+              </button>
+
+              {/* Return Button for Mobile */}
+              <button
+                onClick={handleReturn}
+                className="w-full mt-3 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors md:hidden"
+              >
+                Choose Different Plan
+              </button>
             </div>
           </div>
-
-          <div className="flex items-center bg-blue-50 border border-blue-200 p-3 rounded-lg text-blue-800 text-base gap-2 mt-2 mb-4">
-            <FaLock className="text-gray-400" />
-            <span>Your payment is secured by Stripe's industry-leading encryption</span>
-          </div>
-
-          <button
-            className="mt-2 bg-indigo-600 hover:bg-indigo-500 transition-colors w-full py-3 rounded text-white font-semibold text-lg flex items-center justify-center gap-2"
-            type="submit"
-            disabled={!stripe}
-          >
-            <SiStripe className="text-white" size={20} />  Pay $30
-          </button>
-
-          {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
-      </form>
+      </div>
     </div>
   );
 };

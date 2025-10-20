@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp, FaQuestionCircle } from "react-icons/fa";
+import { Link } from "react-router";
 
 const Faq = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -96,12 +97,10 @@ const Faq = () => {
               Can't find what you're looking for? Our support team is here to help you get the most out of your ForumX experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+            <Link to="contact">  <button className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
                 Contact Support
-              </button>
-              <button className="border border-indigo-500 text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
-                Visit Help Center
-              </button>
+              </button></Link>
+  
             </div>
           </div>
         </div>

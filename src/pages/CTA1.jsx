@@ -99,13 +99,14 @@ export default function CTA1() {
 
             {/* CTA Button */}
             <div className="text-center mt-8">
+             <Link to="contact">
               <a
                 href="mailto:subha9.5roy350@gmail.com"
                 className="inline-flex items-center gap-2 bg-white text-indigo-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Contact Us Now
                 <ArrowRight className="h-5 w-5" />
-              </a>
+              </a></Link>
             </div>
           </div>
         </div>
