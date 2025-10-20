@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useAuth from "../Hooks/useAuth";
 import useAxiosSecure from "../Hooks/useAxiosSecure";
+
 import {
   FaBell,
   FaCheck,
@@ -14,13 +15,21 @@ import {
   FaTimes,
   FaFilter
 } from "react-icons/fa";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useTheme } from "../Hooks/useTheme";
 
 function Notifications() {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
+  const { isDarkMode } = useTheme(); 
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const axiosSecure = useAxiosSecure();
+
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true }); // initialize AOS
+  }, []);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -120,11 +129,11 @@ function Notifications() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
+      <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} min-h-screen pt-20`}>
         <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            <p className="text-gray-600 mt-4">Loading your notifications...</p>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mt-4`}>Loading your notifications...</p>
           </div>
         </div>
       </div>
@@ -132,35 +141,35 @@ function Notifications() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} min-h-screen pt-20`}>
       <div className="max-w-8xl mx-10 px-4 md:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
+        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-sm p-6 mb-8 border`} data-aos="fade-down">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="bg-indigo-600 p-3 rounded-lg">
                 <FaBell className="text-white text-xl" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-                <p className="text-gray-600 mt-1">Stay updated with your community activity</p>
+                <h1 className="text-2xl font-bold">Notifications</h1>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mt-1`}>Stay updated with your community activity</p>
               </div>
             </div>
             
             {/* Stats */}
-            <div className="flex items-center gap-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} flex items-center gap-6 rounded-lg p-4 border`}>
               <div className="text-center">
                 <div className="text-lg font-bold text-indigo-600">
                   {notifications.filter(n => !n.read).length}
                 </div>
-                <div className="text-sm text-gray-500">Unread</div>
+                <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} text-sm`}>Unread</div>
               </div>
               <div className="w-px h-8 bg-gray-300"></div>
               <div className="text-center">
-                <div className="text-lg font-bold text-gray-700">
+                <div className="text-lg font-bold">
                   {notifications.length}
                 </div>
-                <div className="text-sm text-gray-500">Total</div>
+                <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} text-sm`}>Total</div>
               </div>
             </div>
           </div>
@@ -168,10 +177,9 @@ function Notifications() {
 
         {/* Filters and Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          {/* Filter Buttons */}
           <div className="flex items-center gap-3">
-            <FaFilter className="text-gray-500" />
-            <div className="flex gap-1 bg-white rounded-lg p-1 border border-gray-200">
+            <FaFilter className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} flex gap-1 rounded-lg p-1 border`}>
               {[
                 { key: "all", label: "All" },
                 { key: "unread", label: "Unread" },
@@ -181,9 +189,9 @@ function Notifications() {
                   key={key}
                   onClick={() => setFilter(key)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    filter === key 
-                      ? "bg-indigo-600 text-white" 
-                      : "text-gray-600 hover:bg-gray-100"
+                    filter === key
+                      ? "bg-indigo-600 text-white"
+                      : `${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
                   }`}
                 >
                   {label}
@@ -216,41 +224,40 @@ function Notifications() {
         {/* Notifications List */}
         <div className="space-y-4">
           {filteredNotifications.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200">
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-sm p-12 text-center border`} data-aos="fade-up">
               <div className="text-gray-300 mb-4">
                 <FaBell className="text-5xl mx-auto" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">
+              <h3 className="text-lg font-semibold text-gray-500 mb-2">
                 No notifications found
               </h3>
-              <p className="text-gray-500">
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>
                 {filter === "all" 
                   ? "You're all caught up! No notifications yet." 
-                  : `No ${filter} notifications at the moment.`
-                }
+                  : `No ${filter} notifications at the moment.`}
               </p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
               <div
                 key={notification._id}
-                className={`bg-white rounded-xl shadow-sm border-l-4 ${getNotificationTypeColor(notification.type)} border border-gray-200 hover:shadow-md transition-all duration-200`}
+                className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-sm border-l-4 ${getNotificationTypeColor(notification.type)} hover:shadow-md transition-all duration-200`}
+                data-aos="fade-up"
               >
                 <div className="p-6">
                   <div className="flex items-start gap-4">
-                    {/* Icon */}
                     <div className="flex-shrink-0">
-                      <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-3 rounded-lg`}>
                         {getNotificationIcon(notification.type)}
                       </div>
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <p className={`text-base ${
-                            notification.read ? 'text-gray-600' : 'text-gray-900 font-medium'
+                            notification.read 
+                              ? isDarkMode ? 'text-gray-400' : 'text-gray-600' 
+                              : isDarkMode ? 'text-white font-medium' : 'text-gray-900 font-medium'
                           }`}>
                             {notification.message}
                           </p>
@@ -308,7 +315,7 @@ function Notifications() {
         {/* Footer Info */}
         {notifications.length > 0 && (
           <div className="mt-8 text-center">
-            <p className="text-gray-500 text-sm">
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} text-sm`}>
               Showing {filteredNotifications.length} of {notifications.length} notifications
             </p>
           </div>

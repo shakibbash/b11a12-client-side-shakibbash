@@ -6,22 +6,20 @@ import {
   HiGlobe, 
   HiArrowSmRight,
   HiStar,
-  HiShieldCheck,
-  HiTrendingUp
+  HiShieldCheck
 } from 'react-icons/hi';
 import { 
   FaRocket, 
-  FaHandshake, 
-  FaLaptopCode, 
   FaComments,
-  FaAward,
-  FaUserFriends,
   FaBalanceScale
 } from 'react-icons/fa';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { useTheme } from '../Hooks/useTheme';
+
 
 const AboutMe = () => {
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     AOS.init({
@@ -65,20 +63,22 @@ const AboutMe = () => {
     }
   ];
 
-  // Stats data
-  const stats = [
-    { number: "50K+", label: "Active Users", icon: <HiUsers /> },
-    { number: "100K+", label: "Discussions", icon: <FaComments /> },
-    { number: "500+", label: "Communities", icon: <HiGlobe /> },
-    { number: "95%", label: "Satisfaction", icon: <HiStar /> }
-  ];
+
+
+  // Theme-based classes
+  const bgMain = isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gradient-to-br from-gray-50 to-indigo-50';
+  const bgSection = isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900';
+
+  const btnPrimary = isDarkMode
+    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+    : 'bg-indigo-500 text-white hover:bg-indigo-600';
 
   return (
-    <div className="min-h-screen mt-10 bg-gradient-to-br from-gray-50 to-indigo-50">
+    <div className={`min-h-screen ${bgMain} transition-colors duration-300 mt-10`}>
 
       {/* Hero Section */}
       <section 
-        className="relative py-20 bg-gradient-to-r from-indigo-600 to-purple-700 text-white"
+        className={`relative py-20 ${isDarkMode ? 'bg-gradient-to-r from-indigo-800 to-purple-900 text-white' : 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white'}`}
         data-aos="fade-up"
       >
         <div className="absolute inset-0 bg-black opacity-10"></div>
@@ -90,10 +90,10 @@ const AboutMe = () => {
             Where curious minds connect, share knowledge, and build communities that matter.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <button className="bg-white text-indigo-600 px-8 py-3 rounded-full font-semibold hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105 shadow-lg">
+            <button className={`px-8 py-3 rounded-full font-semibold hover:scale-105 transform transition-all duration-300 shadow-lg ${btnPrimary}`}>
               Join Our Community
             </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-indigo-600 transition-all duration-300">
+            <button className={`border-2 px-8 py-3 rounded-full font-semibold hover:opacity-90 transition-all duration-300 ${isDarkMode ? 'border-gray-100 text-gray-100 hover:bg-gray-700 hover:text-white' : 'border-white text-white hover:bg-white hover:text-indigo-600'}`}>
               Learn More
             </button>
           </div>
@@ -101,17 +101,17 @@ const AboutMe = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 bg-white" data-aos="fade-right">
+      <section className={`py-20 transition-colors duration-300 ${bgSection}`} data-aos="fade-right">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Mission</h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <h2 className="text-4xl font-bold mb-6">Our Mission</h2>
+              <p className="text-lg mb-6">
                 At ForumX, we believe in the power of conversation to spark innovation, 
                 foster understanding, and create lasting connections. Our platform is 
                 designed to bring people together around shared interests and meaningful topics.
               </p>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg mb-8">
                 We're committed to building a space where every voice can be heard, 
                 where knowledge is shared freely, and where communities thrive through 
                 genuine engagement.
@@ -122,10 +122,10 @@ const AboutMe = () => {
               </div>
             </div>
             <div className="relative" data-aos="fade-left">
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-8 text-white shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <div className={`rounded-2xl p-8 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300 ${isDarkMode ? 'bg-indigo-700 text-white' : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'}`}>
                 <FaRocket className="w-16 h-16 mb-4 text-yellow-300" />
                 <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
-                <p className="text-indigo-100">
+                <p>
                   To create the world's most engaging and inclusive platform for 
                   knowledge sharing and community building, where everyone feels 
                   empowered to contribute and grow.
@@ -137,11 +137,11 @@ const AboutMe = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-white" data-aos="fade-up">
+      <section className={`py-20 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-4">Our Values</h2>
+            <p className="text-xl max-w-2xl mx-auto">
               The principles that guide everything we do at ForumX
             </p>
           </div>
@@ -151,13 +151,13 @@ const AboutMe = () => {
                 key={index}
                 data-aos="zoom-in"
                 data-aos-delay={index * 100}
-                className="text-center p-8 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
+                className={`text-center p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border ${isDarkMode ? 'border-gray-600' : 'border-gray-100'} ${isDarkMode ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}
               >
                 <div className="text-indigo-600 mb-4 flex justify-center">
                   {value.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{value.title}</h3>
-                <p className="text-gray-600">{value.description}</p>
+                <h3 className="text-xl font-bold mb-4">{value.title}</h3>
+                <p>{value.description}</p>
               </div>
             ))}
           </div>
@@ -165,11 +165,11 @@ const AboutMe = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-gray-50">
+      <section className={`py-20 transition-colors duration-300 ${isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet The Developer of this Platform</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-4">Meet The Developer of this Platform</h2>
+            <p className="text-xl max-w-2xl mx-auto">
               The passionate individuals behind ForumX who work tirelessly to 
               make our community amazing
             </p>
@@ -180,7 +180,7 @@ const AboutMe = () => {
                 key={member.id}
                 data-aos="fade-up"
                 data-aos-delay={index * 100}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 w-80"
+                className={`rounded-2xl overflow-hidden w-80 transform hover:-translate-y-2 transition-all duration-300 ${isDarkMode ? 'bg-gray-700 shadow-lg' : 'bg-white shadow-lg'} `}
               >
                 <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
                   <img
@@ -190,9 +190,9 @@ const AboutMe = () => {
                   />
                 </div>
                 <div className="pt-20 pb-6 px-6 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                  <h3 className="text-xl font-bold mb-2">{member.name}</h3>
                   <p className="text-indigo-600 font-semibold mb-4">{member.role}</p>
-                  <p className="text-gray-600">{member.bio}</p>
+                  <p>{member.bio}</p>
                   <div className="flex justify-center gap-4 mt-6">
                     <button className="text-indigo-600 hover:text-indigo-800 transition-colors">
                       <HiArrowSmRight className="w-5 h-5" />

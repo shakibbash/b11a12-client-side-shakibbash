@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { FaCheckCircle, FaCrown, FaMedal, FaStar, FaArrowRight, FaInfoCircle, FaCreditCard } from "react-icons/fa";
+import { 
+  FaCheckCircle, FaCrown, FaMedal, FaStar, FaArrowRight, FaInfoCircle, FaCreditCard 
+} from "react-icons/fa";
 import Lottie from "lottie-react";
-import goldBadge from "../../../Public/assets/gold medal.json";
-import bronzeBadge from "../../../Public/assets/New Medal.json";
-import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation.json";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import Marquee from "react-fast-marquee";
 import { useNavigate } from "react-router";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
 import Loader from "../../Components/Loader";
+
+import goldBadge from "../../../Public/assets/gold medal.json";
+import bronzeBadge from "../../../Public/assets/New Medal.json";
+import silverBadge from "../../../Public/assets/Glassmorphic Medal Lottie Animation.json";
+import { useTheme } from "../../Hooks/useTheme";
 
 const plans = [
   {
@@ -21,7 +27,6 @@ const plans = [
     features: ["5 posts per day", "Basic community access", "Profile customization", "Access to free categories"],
     cta: "Start Basic",
   },
- 
   {
     name: "Gold",
     price: "$30/mo",
@@ -32,7 +37,7 @@ const plans = [
     features: ["Everything in Silver", "Gold VIP badge", "Early access to new features", "Priority support", "Exclusive events & webinars", "Host polls & Q&As", "Leaderboard spotlight"],
     cta: "Upgrade to Gold",
   },
-   {
+  {
     name: "Silver",
     price: "$15/mo",
     badge: silverBadge,
@@ -50,6 +55,11 @@ const Membership = () => {
   const [userData, setUserData] = useState(null);  
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
+
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -73,10 +83,15 @@ const Membership = () => {
 
   const isCurrentPlan = (planName) => userData.membership === planName;
 
-  return (
-    <div className="min-h-screen bg-white mt-10">
+  // Theme-based classes
+  const bgSection = isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900";
+  const bgCard = isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900";
+  const bgHero=    isDarkMode ? 'bg-gray-900 text-gray-100' : "bg-gradient-to-br from-indigo-600 to-purple-600 text-white";
+
+ return (
+    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white py-16">
+      <section className={`py-20 ${bgHero}` } data-aos="fade-up">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <div className="w-32 h-32 mx-auto mb-6">
@@ -88,24 +103,20 @@ const Membership = () => {
             <p className="text-xl text-indigo-100 mb-8 leading-relaxed">
               Unlock premium features, earn exclusive badges, and enjoy unlimited access to our thriving community.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-         
-               <a href="#plan" className=" bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"> View Plans</a>
-       
-              
-   
-            </div>
+            <a href="#plan" className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              View Plans
+            </a>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="plan" className="py-16 bg-gray-50">
+      <section id="plan" className={`py-16 transition-colors duration-300 ${bgSection}`}>
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+          <div className="text-center mb-12" data-aos="fade-up">
+            <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto">
               Select the perfect plan to unlock premium features and enhance your community experience
             </p>
           </div>
@@ -116,11 +127,12 @@ const Membership = () => {
               return (
                 <div
                   key={index}
-                  className={`bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border-2 ${
-                    selected === plan.name 
-                      ? `border-${plan.color}-500 ring-2 ring-${plan.color}-200` 
-                      : 'border-gray-200'
-                  } ${plan.popular ? 'relative ring-2 ring-yellow-200' : ''}`}
+                  className={`rounded-2xl shadow-sm transition-all duration-300 p-8 border-2 relative ${bgCard}`}
+                  data-aos="fade-up"
+                  data-aos-delay={index * 150}
+                  style={{
+                    borderColor: selected === plan.name ? "#6366F1" : currentPlan ? "#FBBF24" : isDarkMode ? "#374151" : "#E5E7EB",
+                  }}
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -137,7 +149,7 @@ const Membership = () => {
 
                   {/* Plan Header */}
                   <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                     <p className="text-3xl font-bold text-indigo-600">{plan.price}</p>
                   </div>
 
@@ -146,7 +158,7 @@ const Membership = () => {
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3">
                         <FaCheckCircle className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm">{feature}</span>
+                        <span className="text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -155,16 +167,15 @@ const Membership = () => {
                   <button
                     onClick={() => !currentPlan && setSelected(plan.name)}
                     disabled={currentPlan}
-                    className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                    className={`w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors ${
                       currentPlan
-                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        ? "bg-gray-400 text-white cursor-not-allowed"
                         : selected === plan.name
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
-                    {plan.icon}
-                    {currentPlan ? 'Current Plan' : plan.cta}
+                    {plan.icon} {currentPlan ? "Current Plan" : plan.cta}
                   </button>
                 </div>
               );
@@ -175,40 +186,37 @@ const Membership = () => {
 
       {/* Selected Plan CTA */}
       {selected && !isCurrentPlan(selected) && (
-        <section className="py-12 bg-white border-t border-gray-200">
+        <section className={`py-12 border-t border-gray-200 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
           <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8 text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
               <FaCreditCard className="text-indigo-600" />
               Selected: {selected} Plan
             </h3>
             <button
               onClick={handleProceedToPayment}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold flex items-center gap-2 mx-auto transition-colors"
             >
-              Proceed to Payment
-              <FaArrowRight className="w-4 h-4" />
+              Proceed to Payment <FaArrowRight className="w-4 h-4" />
             </button>
           </div>
         </section>
       )}
 
       {/* Comparison Table */}
-      <section className="py-16 bg-white">
+      <section className={`py-16 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Plan Comparison</h2>
+            <h2 className="text-3xl font-bold mb-4">Plan Comparison</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50">
+          <div className={`overflow-x-auto rounded-2xl shadow-sm ${bgCard}`}>
+            <table className="w-full min-w-max border-collapse">
+              <thead className={`border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"} bg-gray-50`}>
                 <tr>
-                  <th className="px-6 py-4 text-left font-semibold text-gray-900">Features</th>
+                  <th className="px-6 py-4 text-left font-semibold">Features</th>
                   {plans.map((plan) => (
-                    <th key={plan.name} className="px-6 py-4 text-center font-semibold text-gray-900">
-                      {plan.name}
-                    </th>
+                    <th key={plan.name} className="px-6 py-4 text-center font-semibold">{plan.name}</th>
                   ))}
                 </tr>
               </thead>
@@ -222,7 +230,7 @@ const Membership = () => {
                   ["File uploads", "Basic","Unlimited", "Enhanced", ],
                 ].map(([feature, ...values], index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{feature}</td>
+                    <td className="px-6 py-4 font-medium">{feature}</td>
                     {values.map((value, idx) => (
                       <td key={idx} className="px-6 py-4 text-center">
                         {typeof value === 'boolean' ? (
@@ -232,7 +240,7 @@ const Membership = () => {
                             <FaInfoCircle className="w-4 h-4 text-gray-400 mx-auto" />
                           )
                         ) : (
-                          <span className="text-gray-600 font-medium">{value}</span>
+                          <span className="font-medium">{value}</span>
                         )}
                       </td>
                     ))}
@@ -244,11 +252,11 @@ const Membership = () => {
         </div>
       </section>
 
-      {/* Features Highlight */}
-      <section className="py-16 bg-gray-50">
+      {/* Premium Benefits */}
+      <section className={`py-16 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Benefits</h2>
+            <h2 className="text-3xl font-bold mb-4">Premium Benefits</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
           </div>
 
@@ -258,14 +266,12 @@ const Membership = () => {
               { icon: <FaStar className="w-8 h-8" />, title: "Ad-Free Experience", desc: "Enjoy seamless browsing without any interruptions" },
               { icon: <FaMedal className="w-8 h-8" />, title: "VIP Events", desc: "Access exclusive webinars, polls, and community events" },
             ].map((feature, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-all duration-300">
+              <div key={index} className={`rounded-2xl p-8 text-center shadow-sm transition-all duration-300 ${bgCard}`} data-aos="fade-up" data-aos-delay={index*100}>
                 <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <div className="text-indigo-600">
-                    {feature.icon}
-                  </div>
+                  <div className="text-indigo-600">{feature.icon}</div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+                <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                <p className="leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -273,10 +279,10 @@ const Membership = () => {
       </section>
 
       {/* Payment Methods */}
-      <section className="py-16 bg-white">
+      <section className={`py-16 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
         <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Secure Payment Methods</h2>
+            <h2 className="text-3xl font-bold mb-4">Secure Payment Methods</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
           </div>
 
@@ -299,10 +305,10 @@ const Membership = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-8xl mx-10 px-4 md:px-6 lg:px-8">
+      <section className={`py-16 transition-colors duration-300 ${bgSection}`} data-aos="fade-up">
+        <div className="max-w-8xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
           </div>
 
@@ -313,9 +319,9 @@ const Membership = () => {
               { q: "Is my payment information secure?", a: "Yes, all payments are processed through secure, encrypted payment gateways." },
               { q: "Can I cancel my subscription?", a: "Yes, you can cancel anytime from your account settings. No cancellation fees." },
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-semibold text-gray-900 mb-3">{faq.q}</h3>
-                <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+              <div key={index} className={`rounded-2xl p-6 shadow-sm transition-colors duration-300 ${bgCard}`} data-aos="fade-up" data-aos-delay={index*100}>
+                <h3 className="font-semibold mb-3">{faq.q}</h3>
+                <p className="leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>

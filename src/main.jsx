@@ -6,13 +6,15 @@ import router from "./routes/Routes";
 import AuthProvider from "./Provider/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import { ThemeProvider } from "./Provider/ThemeProvider";
 
 // Create a client
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+<ThemeProvider>
+      <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="font-urbanist">
           <RouterProvider router={router} />
@@ -21,5 +23,6 @@ createRoot(document.getElementById("root")).render(
         </div>
       </AuthProvider>
     </QueryClientProvider>
+</ThemeProvider>
   </StrictMode>
 );
