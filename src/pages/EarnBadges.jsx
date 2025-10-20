@@ -8,7 +8,7 @@ import silverBadge from "../../Public/assets/Glassmorphic Medal Lottie Animation
 const badges = [
   {
     title: "Bronze Badge",
-    desc: "Free badge during registration. 5 posts maximum",
+    desc: "Free badge during registration. 5 posts maximum.Free trial for experiencing our service",
     animation: bronzeBadge,
     color: "from-yellow-400 to-orange-400",
     requirement: "Complete registration"

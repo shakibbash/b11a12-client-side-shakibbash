@@ -6,7 +6,7 @@ export default function CTA1() {
   return (
     <div className="w-full">
       <section className="mx-10 max-w-8xl px-2 py-12 lg:px-8">
-        <div className="bg-indigo-600 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-indigo-500 rounded-2xl overflow-hidden shadow-xl">
           <div className="relative px-6 py-12 sm:px-12 sm:py-16 lg:px-16 lg:py-20">
             {/* Header */}
             <div className="text-center lg:text-center max-w-4xl mx-auto">
@@ -37,8 +37,8 @@ export default function CTA1() {
                 className="group bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/30"
               >
                 <div className="flex items-center gap-4">
-                  <div className="bg-red-500/20 p-3 rounded-lg">
-                    <Mail className="h-6 w-6 text-red-400" />
+                  <div className=" p-2 rounded-lg">
+                    <Mail className="text-white w-10 h-10 flex items-center justify-center  rounded-2xl mx-auto mb-6 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-semibold">Email Us</p>
@@ -52,8 +52,8 @@ export default function CTA1() {
                 className="group bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/30"
               >
                 <div className="flex items-center gap-4">
-                  <div className="bg-green-500/20 p-3 rounded-lg">
-                    <Phone className="h-6 w-6 text-green-400" />
+                  <div className=" p-3 rounded-lg">
+                    <Phone className="text-white w-8 h-8 flex items-center justify-center  rounded-2xl mx-auto mb-6 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-semibold">Call Us</p>
@@ -67,8 +67,8 @@ export default function CTA1() {
                 className="group bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/30"
               >
                 <div className="flex items-center gap-4">
-                  <div className="bg-blue-500/20 p-3 rounded-lg">
-                    <Globe className="h-6 w-6 text-blue-400" />
+                  <div className=" p-5 rounded-lg">
+                    <Globe className="text-white w-8 h-8 flex items-center justify-center  rounded-2xl mx-auto mb-6 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-semibold">Visit Website</p>

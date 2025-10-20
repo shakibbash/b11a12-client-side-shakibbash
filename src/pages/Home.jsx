@@ -15,6 +15,7 @@ import EarnBadges from "./EarnBadges";
 import LatestPosts from "./LatestPosts";
 import { Link } from "react-router";
 import CTA1 from "./CTA1";
+import HeroCarousel from "./HeroCarousel";
 
 
 
@@ -598,6 +599,7 @@ return (
   )}
 
   {/* ===== Extra Sections ===== */}
+  <HeroCarousel></HeroCarousel>
   <CountUpStats />
   <WhyChooseUs />
   <EarnBadges />
