@@ -24,6 +24,7 @@ import ManageUsers from "../pages/AdminPages/ManageUsers";
 import Notifications from "../pages/Notications";
 import PrivateRoutes from "./PrivateRoute";
 import AboutMe from "../pages/AboutMe";
+import Contact from "../pages/Contact";
 
 // Admin pages
 
@@ -39,7 +40,8 @@ const router = createBrowserRouter([
       {path:"/notifications", element:<PrivateRoute><Notifications /></PrivateRoute>},
       { path: "membership", element:<PrivateRoute><Membership /></PrivateRoute>  },
       { path: "payments", element:<PrivateRoute><Payment /></PrivateRoute>  },
-       { path: "about", element:<AboutMe></AboutMe> }
+       { path: "about", element:<AboutMe></AboutMe> },
+       {path:"contact",element:<Contact></Contact>}
     ],
   },
   {

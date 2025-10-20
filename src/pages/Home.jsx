@@ -16,6 +16,7 @@ import LatestPosts from "./LatestPosts";
 import { Link } from "react-router";
 import CTA1 from "./CTA1";
 import HeroCarousel from "./HeroCarousel";
+import Faq from "./Faq";
 
 
 
@@ -193,7 +194,7 @@ return (
 
   {/* ===== Banner Section ===== */}
 <section className=" max-w-8xl mx-10 px-4 md:px-6 lg:px-8 mt-20 mb-12">
-  <div className="bg-indigo-600 rounded-2xl shadow-lg p-8 text-white">
+  <div className="bg-indigo-500 rounded-2xl shadow-lg p-8 text-white">
     {/* Header Section */}
     <div className="text-center mb-8">
       <div className="flex items-center justify-center gap-3 mb-4">
@@ -605,6 +606,7 @@ return (
   <EarnBadges />
   <Testimonials />
   <CTA1></CTA1>
+  <Faq></Faq>
 </div>
 
 

@@ -14,14 +14,14 @@ const testimonials = [
   {
     name: "James Lee",
     role: "Moderator",
-    text: "I love how organized everything is. Posts, tags, and discussions are easy to follow. Great job to the devs!",
+    text: "I love how organized everything is. Posts, tags, and discussions are easy to follow. Great job to the devs!Also their website is smooth",
     rating: 4,
     img:"https://i.postimg.cc/c1nnnRBH/116be8bc85ac6d04c7c7354482f2a065.jpg"
   },
   {
     name: "James Patel",
     role: "Premium Member",
-    text: "The premium features are worth it — priority responses and access to exclusive discussions.",
+    text: "The premium features are worth it — priority responses and access to exclusive discussions.Great initiatives to dev's,The UI is pleasant",
     rating: 5,
     img:"https://i.postimg.cc/3wqkyNy1/8fqzw8yxpkp11.jpg"
   },
@@ -51,13 +51,13 @@ const Testimonials = () => {
           {testimonials.map((testimonial, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-100"
+              className="bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-100"
               data-aos="fade-up"
               data-aos-delay={idx * 150}
             >
               {/* Quote Icon */}
               <div className="flex justify-center mb-4">
-                <FaQuoteLeft className="text-3xl text-indigo-600 opacity-20" />
+                <FaQuoteLeft className="text-3xl text-indigo-600 opacity-20 animate-bounce" />
               </div>
 
           {/* User Avatar */}

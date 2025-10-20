@@ -25,10 +25,7 @@ const Faq = () => {
       question: "Are there any posting guidelines I should follow?",
       answer: "Yes, we encourage respectful, constructive discussions. Avoid spam, offensive language, and personal attacks. Posts should be relevant to the community and add value to conversations. Our moderation team reviews all content."
     },
-    {
-      question: "How does the moderation system work?",
-      answer: "ForumX uses both AI-powered and human moderation. Our team works 24/7 to ensure a safe environment. Users can also report inappropriate content, which our moderators review promptly."
-    },
+    
     {
       question: "Can I upload images to my posts?",
       answer: "Yes! Bronze members can upload limited images, while Silver and Gold members enjoy increased and unlimited image upload capabilities respectively. All images are moderated for appropriateness."
@@ -37,27 +34,16 @@ const Faq = () => {
       question: "How do I earn recognition in the community?",
       answer: "Active participation, quality posts, helpful responses, and consistent engagement earn you upvotes and reputation. Top contributors receive special badges and may be featured in our community highlights."
     },
-    {
-      question: "Is my personal information secure?",
-      answer: "Absolutely. We use bank-level encryption and never share your personal data with third parties. Your email and personal details are protected according to our strict privacy policy."
-    },
-    {
-      question: "What happens if I forget my password?",
-      answer: "Click 'Forgot Password' on the login page. We'll send a secure reset link to your registered email address. The link expires after 24 hours for security purposes."
-    },
-    {
-      question: "Can I delete my account if I no longer want to use ForumX?",
-      answer: "Yes, you can delete your account from the settings page. Please note that this action is permanent and will remove all your posts and data from our platform."
-    }
+   
   ];
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+    <section className="py-12 bg-blue-50">
+      <div className="max-w-8xl mx-10 px-4 md:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <FaQuestionCircle className="text-3xl text-indigo-600" />
+    
             <h2 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
           </div>
           <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
@@ -77,7 +63,7 @@ const Faq = () => {
                 onClick={() => toggleFAQ(index)}
                 className="w-full px-6 py-4 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded-lg"
               >
-                <span className="text-lg font-semibold text-gray-900 pr-4">
+                <span className="text-center text-lg font-semibold text-gray-900 pr-4">
                   {faq.question}
                 </span>
                 <div className="flex-shrink-0">
@@ -104,16 +90,16 @@ const Faq = () => {
 
         {/* Additional Help CTA */}
         <div className="text-center mt-12">
-          <div className="bg-indigo-50 rounded-2xl p-8 max-w-2xl mx-auto">
+          <div className="bg-blue-50 rounded-2xl p-8 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Still Have Questions?</h3>
             <p className="text-gray-600 mb-6">
               Can't find what you're looking for? Our support team is here to help you get the most out of your ForumX experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+              <button className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
                 Contact Support
               </button>
-              <button className="border border-indigo-600 text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
+              <button className="border border-indigo-500 text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
                 Visit Help Center
               </button>
             </div>

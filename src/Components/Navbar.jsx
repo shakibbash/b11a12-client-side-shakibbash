@@ -7,6 +7,7 @@ import {
   FaInfoCircle,
   FaBars,
   FaTimes,
+  FaPhoneAlt,
 } from "react-icons/fa";
 import useAuth from "../Hooks/useAuth";
 import useAxiosSecure from "../Hooks/useAxiosSecure";
@@ -96,6 +97,12 @@ const Navbar = () => {
               className="flex items-center space-x-1 text-gray-800  hover:text-indigo-500 font-medium transition"
             >
               <FaInfoCircle /> <span>About</span>
+            </Link>
+             <Link
+              to="/contact"
+              className="flex items-center space-x-1 text-gray-800  hover:text-indigo-500 font-medium transition"
+            >
+              <FaPhoneAlt /> <span>Contact</span>
             </Link>
 
             {user && (
