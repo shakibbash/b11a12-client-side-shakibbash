@@ -1,6 +1,6 @@
 import React from "react";
 import Lottie from "lottie-react";
-import { FaStar, FaAward } from "react-icons/fa";
+import { FaTrophy, FaUsers, FaChartLine, FaAward, FaMedal, FaStar } from "react-icons/fa";
 import goldBadge from "../../Public/assets/gold medal.json";
 import bronzeBadge from "../../Public/assets/New Medal.json";
 import silverBadge from "../../Public/assets/Glassmorphic Medal Lottie Animation.json";
@@ -8,52 +8,55 @@ import silverBadge from "../../Public/assets/Glassmorphic Medal Lottie Animation
 const badges = [
   {
     title: "Bronze Badge",
-    desc: "Free badge  during registration  Bronze Badge. 5 posts maximum",
+    desc: "Free badge during registration. 5 posts maximum",
     animation: bronzeBadge,
     color: "from-yellow-400 to-orange-400",
-    icon: <FaAward className="text-white text-2xl" />,
+    requirement: "Complete registration"
   },
   {
     title: "Gold Badge",
-    desc: "Become a top contributor and unlock the Gold Badge ! Unlimited posts with images",
+    desc: "Become a top contributor and unlock unlimited posts with images",
     animation: goldBadge,
     color: "from-yellow-500 to-yellow-400",
-    icon: <FaAward className="text-white text-2xl" />,
+    requirement: "50+ quality posts"
   },
   {
     title: "Silver Badge",
-    desc: "Membership to upgrade a level up  to claim the Silver Badge.",
+    desc: "Upgrade to unlock advanced features and increased post limits",
     animation: silverBadge,
     color: "from-gray-400 to-gray-600",
-    icon: <FaStar className="text-white text-2xl" />,
+    requirement: "20+ active posts"
   },
-  
 ];
 
-const EarnBadges = () => (
-  <section className="py-16 bg-gray-50" data-aos="fade-up" data-aos-duration="1000">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      {/* Heading */}
-      <h2 className="text-3xl font-bold mb-4 text-gray-800 flex justify-center items-center gap-2">
-        <FaAward className="text-indigo-600" /> Earn Badges
-      </h2>
-        <div className="w-24 h-1 bg-gradient-to-r from-indigo-600 to-indigo-400 mx-auto mb-4"></div>
-      <p className="text-gray-600 mb-10">
-        Unlock achievements by participating and contributing actively in the ForumX community.
-      </p>
 
-      {/* Single row badges */}
-      <div className="flex flex-wrap justify-center gap-8">
+
+const EarnBadges = () => (
+  <section className="py-12 bg-white">
+    <div className="max-w-8xl mx-10 px-4 md:px-6 lg:px-8">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4 flex justify-center items-center gap-3">
+
+          Earn Recognition Badges
+        </h2>
+        <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+          Level up your forum experience by earning badges through active participation and valuable contributions.
+        </p>
+      </div>
+
+      {/* Badges Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
         {badges.map((badge, idx) => (
           <div
             key={idx}
-            className={`bg-white rounded-2xl shadow-lg w-60 p-4 flex flex-col items-center transition transform hover:-translate-y-1 hover:shadow-xl`}
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 group hover:border-indigo-100"
             data-aos="fade-up"
             data-aos-delay={idx * 150}
-            data-aos-duration="800"
           >
             {/* Lottie Animation */}
-            <div className="w-24 h-24 mb-3">
+            <div className="w-40 h-40 mx-auto mb-6 group-hover:scale-105 transition-transform duration-300">
               <Lottie
                 animationData={badge.animation}
                 loop
@@ -62,18 +65,49 @@ const EarnBadges = () => (
               />
             </div>
 
-            {/* Icon */}
-            <div className={`mb-2 p-2 rounded-full bg-gradient-to-r ${badge.color} shadow-md`}>
-              {badge.icon}
+            {/* Badge Info */}
+            {/* <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${badge.color} text-white text-sm font-semibold mb-4`}>
+              <FaStar className="w-4 h-4" />
+              {badge.title}
+            </div> */}
+
+            <h3 className="text-xl font-bold text-gray-900 mb-3">{badge.title}</h3>
+            <p className="text-gray-600 mb-4 leading-relaxed">{badge.desc}</p>
+            <div className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">
+              Requirement: {badge.requirement}
             </div>
-
-            {/* Title */}
-            <h3 className="text-lg font-bold text-gray-800 mb-1 text-center">{badge.title}</h3>
-
-            {/* Short Description */}
-            <p className="text-gray-600 text-sm text-center">{badge.desc}</p>
           </div>
         ))}
+      </div>
+
+    
+
+      {/* Achievement Progress Section */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">Start Your Badge Journey</h3>
+          <p className="text-gray-600 max-w-xl mx-auto text-lg">
+            Every great contributor starts with a single post. Begin your journey today and watch your badge collection grow!
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div className="bg-indigo-50 rounded-xl p-6">
+            <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-full text-2xl font-bold text-indigo-600 mb-2 bg-white ">1</div>
+            <h4 className="font-semibold text-gray-900 mb-2">Create Account</h4>
+            <p className="text-gray-600 text-sm">Sign up and get your Bronze badge instantly</p>
+          </div>
+          <div className="bg-indigo-50 rounded-xl p-6">
+ <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-full text-2xl font-bold text-indigo-600 mb-2 bg-white ">2</div>
+            <h4 className="font-semibold text-gray-900 mb-2">Engage Actively</h4>
+            <p className="text-gray-600 text-sm">Post, comment, and interact with the community</p>
+          </div>
+          <div className="bg-indigo-50 rounded-xl p-6">
+ <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-full text-2xl font-bold text-indigo-600 mb-2 bg-white ">3</div>
+            <h4 className="font-semibold text-gray-900 mb-2">Earn Recognition</h4>
+            <p className="text-gray-600 text-sm">Unlock Silver and Gold badges through contributions</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>

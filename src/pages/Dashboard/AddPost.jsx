@@ -271,30 +271,25 @@ const AddPost = () => {
               </div>
 
               {/* Image Upload */}
-              {isMember ? (
-                <div className="relative">
-                  <label className="block mb-2 font-medium text-gray-700">Upload Image</label>
-                  <input
-                    type="file"
-                    onChange={handleUpload}
-                    className="file-input file-input-bordered file-input-primary w-full"
-                    disabled={uploading}
-                  />
-                  {imageUrl && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xl"
-                    >
-                      <FaTimes />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400">
-                  Upgrade to membership to upload images.
-                </p>
-              )}
+              <div className="relative">
+  <label className="block mb-2 font-medium text-gray-700">Upload Image</label>
+  <input
+    type="file"
+    onChange={handleUpload}
+    className="file-input file-input-bordered file-input-primary w-full"
+    disabled={uploading}
+  />
+  {imageUrl && (
+    <button
+      type="button"
+      onClick={handleRemoveImage}
+      className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xl"
+    >
+      <FaTimes />
+    </button>
+  )}
+</div>
+
 
               <button
                 type="submit"
